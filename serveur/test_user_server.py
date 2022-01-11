@@ -3,6 +3,7 @@ import requests
 import shlex
 import subprocess
 import time
+from json import dumps
 
 class TestUserSrv(unittest.TestCase):
 
@@ -26,6 +27,12 @@ class TestUserSrv(unittest.TestCase):
 	def test_launchSrv(self):
 		response = requests.get(self.SrvUrl+"/isalive")
 		self.assertEqual(response.status_code,200)
+
+	def test_UserSrv(self):
+		json = dumps({"name": "Patachou", "ip": "0"}, sort_keys=False)
+		response = requests.post(self.SrvUrl+"/user", json)
+		self.assertEqual(response.status_code,500)
+
 
 if __name__ == '__main__':
 	unittest.main()

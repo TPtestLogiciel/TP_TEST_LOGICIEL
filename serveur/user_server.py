@@ -13,6 +13,7 @@ import logging
 from docopt import docopt
 from flask import Flask
 from flask import Response
+from flask import request
 
 
 conn = sqlite3.connect('data.db')
@@ -24,6 +25,13 @@ APP = Flask(__name__)
 def is_alive():
 	return Response(status=200)
 
+# 
+@APP.route('/user', methods=['POST']) 
+def post_json():
+	data = request.get_json()
+	name = data.get('name', '')
+	ip = data.get('ip', '')
+	return data
 
 def bdd_creation():
 	
