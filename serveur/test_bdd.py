@@ -10,7 +10,6 @@ class TestBddSrv(unittest.TestCase):
         bdd.bdd_creation()
         cursor = bdd.conn.execute('select * from BDD')
         names = list(map(lambda x: x[0], cursor.description))
-        self.assertIn("id",names)
         self.assertIn("username",names)
         self.assertIn("password",names)
         self.assertIn("ip",names)
@@ -48,11 +47,51 @@ class TestBddSrv(unittest.TestCase):
 			) # terrible code to generate a random string
 		)
         self.assertFalse(bdd.CheckKey(""))
+
+    def CreateRandomIP(self):
+        ip = ".".join(map(str, (random.randint(0, 255) 
+                        for _ in range(4))))
+        print(ip)
+        return ip
+
+    def test_Ajout(self):
+        key = self.CreateRandomString(128) # nobody said anything about using 4 times the same key (yet)
+        self.assertFalse(bdd.bdd_ajout("aaa","aAaa#a9aa",self.CreateRandomIP(),key,key)) # bad username
+        self.assertFalse(bdd.bdd_ajout("aaaa","",self.CreateRandomIP(),key,key)) # bad password
+        self.assertFalse(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),self.CreateRandomString(127),key)) # bad key
+        self.assertFalse(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key,self.CreateRandomString(127))) # bad key
+        self.assertTrue(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key,key))
+        self.assertFalse(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key,key)) # Not supposed to be able to add 2* same user
         
+    def test_UserLogin(self):
+		# Let's add a correct user :
+        key = self.CreateRandomString(128)
+        self.assertTrue(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key,key))
+        self.assertTrue(bdd.CheckUserLogin("aaaa","aAaa#a9aa"))
+        self.assertFalse(bdd.CheckUserLogin("aaaa","aAaa#a9a")) # Bad Password
+        self.assertFalse(bdd.CheckUserLogin("aaab","aAaa#a9aa")) # Bad Username
 
-    #def test_bdd_username():
+    def test_CheckDbHealth(self):
+        key = self.CreateRandomString(128)
+        self.assertTrue(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key,key))
+        key = self.CreateRandomString(128)
+        self.assertTrue(bdd.bdd_ajout("bbbb","aAaa#a9aa",self.CreateRandomIP(),key,key)) 
+        self.assertTrue(bdd.CheckDbHealth())
 
-		
+		# Let's add a corrupt User :
+        '''
+        con = sqlite3.connect(self.test_db)
+        cur = con.cursor()
+        cur.execute("INSERT INTO users VALUES (?,?,?,?)",
+				("#######","aAaa#a9aa",self.CreateRandomIP(),key,key))
+        con.commit()
+        con.close()
+        self.assertFalse(bdd.CheckDbHealth(self.test_db))
+		'''
+        # to be really complete we shall also add tests with bad passwd, bad key and so on
+    
+
+
 
 if __name__ == '__main__':
 	unittest.main()

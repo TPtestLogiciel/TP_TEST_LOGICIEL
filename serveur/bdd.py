@@ -7,15 +7,22 @@ cur = conn.cursor()
 
 def CheckUsername(username):
 
-	return -1
+	return False
 
 def CheckPassword(password):
 
-	return -1
+	return False
 
 def CheckKey(key):
 
-	return -1
+	return False
+
+def CheckUserLogin(username, password):
+    return False
+
+def CheckDbHealth():
+    return False
+
 
 def bdd_creation():
 
@@ -24,13 +31,11 @@ def bdd_creation():
     conn.commit()
 
     sql = '''CREATE TABLE BDD (
-                  id INTEGER PRIMARY KEY,
                   username TEXT NOT NULL,
                   password TEXT NOT NULL,
 				  ip TEXT NOT NULL,
 				  clef_pub TEXT NOT NULL,
 				  clef_priv TEXT NOT NULL
-
            );'''
 	
     cur.execute(sql)
@@ -38,12 +43,11 @@ def bdd_creation():
     print("Base de données crée et correctement connectée à SQLite")
     return True
 
-def bdd_ajout(id, username, password, ip, clef_pub, clef_priv):
-    sql = "INSERT INTO bdd (id, username, password, ip, clef_pub, clef_priv) VALUES (?, ?, ?, ?, ?, ?)"
-    value = (id, username, password, ip, clef_pub, clef_priv)
+def bdd_ajout(username, password, ip, clef_pub, clef_priv):
+    sql = "INSERT INTO bdd (username, password, ip, clef_pub, clef_priv) VALUES (?, ?, ?, ?, ?)"
+    value = (username, password, ip, clef_pub, clef_priv)
     cur.execute(sql, value)
     conn.commit()
-    conn.close()
     print("Ajout d'infos")
 
 def bdd_affich():
