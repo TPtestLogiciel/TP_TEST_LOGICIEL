@@ -23,6 +23,9 @@ def CheckUserLogin(username, password):
 def CheckDbHealth():
     return False
 
+def CheckIP():
+    return False
+
 
 def bdd_creation():
 

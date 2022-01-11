@@ -77,21 +77,13 @@ class TestBddSrv(unittest.TestCase):
         key = self.CreateRandomString(128)
         self.assertTrue(bdd.bdd_ajout("bbbb","aAaa#a9aa",self.CreateRandomIP(),key,key)) 
         self.assertTrue(bdd.CheckDbHealth())
-
-		# Let's add a corrupt User :
-        '''
-        con = sqlite3.connect(self.test_db)
-        cur = con.cursor()
-        cur.execute("INSERT INTO users VALUES (?,?,?,?)",
-				("#######","aAaa#a9aa",self.CreateRandomIP(),key,key))
-        con.commit()
-        con.close()
-        self.assertFalse(bdd.CheckDbHealth(self.test_db))
-		'''
-        # to be really complete we shall also add tests with bad passwd, bad key and so on
     
-
-
+    def test_CheckIP(self):
+        self.assertTrue(bdd.CheckIP(self.CreateRandomIP())) # IP fonctionnelle
+        self.assertFalse(bdd.CheckIP("1.4.126.79.78")) # Taille trop grande
+        self.assertFalse(bdd.CheckIP("1.2")) # Taille trop petite
+        self.assertFalse(bdd.CheckIP("-128.-10.54.6")) # une valeur negative
+        self.assertFalse(bdd.CheckIP("500.200.128.3")) # une valeur < 255
 
 if __name__ == '__main__':
 	unittest.main()
