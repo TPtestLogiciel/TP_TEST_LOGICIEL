@@ -82,6 +82,9 @@ class TestBddSrv(unittest.TestCase):
         self.assertFalse(bdd.CheckIP("1.2")) # Taille trop petite
         self.assertFalse(bdd.CheckIP("-128.-10.54.6")) # une valeur negative
         self.assertFalse(bdd.CheckIP("500.200.128.3")) # une valeur < 255
+        self.assertFalse(bdd.CheckIP("30.100.128.a")) # lettre ascii
+        self.assertFalse(bdd.CheckIP("30.100.128.#")) # caractere special
+        self.assertFalse(bdd.CheckIP("30.100.128.A")) # majuscule ascii
 
 if __name__ == '__main__':
 	unittest.main()
