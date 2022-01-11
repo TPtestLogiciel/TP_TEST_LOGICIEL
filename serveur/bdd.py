@@ -4,17 +4,13 @@ import os
 conn = sqlite3.connect('data.db')
 cur = conn.cursor()
 
-
 def CheckUsername(username):
-
 	return False
 
 def CheckPassword(password):
-
 	return False
 
 def CheckKey(key):
-
 	return False
 
 def CheckUserLogin(username, password):
@@ -23,9 +19,8 @@ def CheckUserLogin(username, password):
 def CheckDbHealth():
     return False
 
-def CheckIP():
+def CheckIP(ip):
     return False
-
 
 def bdd_creation():
 
@@ -37,8 +32,7 @@ def bdd_creation():
                   username TEXT NOT NULL,
                   password TEXT NOT NULL,
 				  ip TEXT NOT NULL,
-				  clef_pub TEXT NOT NULL,
-				  clef_priv TEXT NOT NULL
+				  clef_pub TEXT NOT NULL
            );'''
 	
     cur.execute(sql)
@@ -46,9 +40,9 @@ def bdd_creation():
     print("Base de données crée et correctement connectée à SQLite")
     return True
 
-def bdd_ajout(username, password, ip, clef_pub, clef_priv):
-    sql = "INSERT INTO bdd (username, password, ip, clef_pub, clef_priv) VALUES (?, ?, ?, ?, ?)"
-    value = (username, password, ip, clef_pub, clef_priv)
+def bdd_ajout(username, password, ip, clef_pub):
+    sql = "INSERT INTO bdd (username, password, ip, clef_pub) VALUES (?, ?, ?, ?)"
+    value = (username, password, ip, clef_pub)
     cur.execute(sql, value)
     conn.commit()
     print("Ajout d'infos")

@@ -14,7 +14,6 @@ class TestBddSrv(unittest.TestCase):
         self.assertIn("password",names)
         self.assertIn("ip",names)
         self.assertIn("clef_pub",names)
-        self.assertIn("clef_priv",names)
     
     def test_username(self):
         self.assertFalse(bdd.CheckUsername("")) # empty
@@ -56,26 +55,25 @@ class TestBddSrv(unittest.TestCase):
 
     def test_Ajout(self):
         key = self.CreateRandomString(128) # nobody said anything about using 4 times the same key (yet)
-        self.assertFalse(bdd.bdd_ajout("aaa","aAaa#a9aa",self.CreateRandomIP(),key,key)) # bad username
-        self.assertFalse(bdd.bdd_ajout("aaaa","",self.CreateRandomIP(),key,key)) # bad password
-        self.assertFalse(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),self.CreateRandomString(127),key)) # bad key
-        self.assertFalse(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key,self.CreateRandomString(127))) # bad key
-        self.assertTrue(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key,key))
-        self.assertFalse(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key,key)) # Not supposed to be able to add 2* same user
+        self.assertFalse(bdd.bdd_ajout("aaa","aAaa#a9aa",self.CreateRandomIP(),key)) # bad username
+        self.assertFalse(bdd.bdd_ajout("aaaa","",self.CreateRandomIP(),key)) # bad password
+        self.assertFalse(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),self.CreateRandomString(127))) # bad key
+        self.assertTrue(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key))
+        self.assertFalse(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key)) # Not supposed to be able to add 2* same user
         
     def test_UserLogin(self):
 		# Let's add a correct user :
         key = self.CreateRandomString(128)
-        self.assertTrue(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key,key))
+        self.assertTrue(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key))
         self.assertTrue(bdd.CheckUserLogin("aaaa","aAaa#a9aa"))
         self.assertFalse(bdd.CheckUserLogin("aaaa","aAaa#a9a")) # Bad Password
         self.assertFalse(bdd.CheckUserLogin("aaab","aAaa#a9aa")) # Bad Username
 
     def test_CheckDbHealth(self):
         key = self.CreateRandomString(128)
-        self.assertTrue(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key,key))
+        self.assertTrue(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key))
         key = self.CreateRandomString(128)
-        self.assertTrue(bdd.bdd_ajout("bbbb","aAaa#a9aa",self.CreateRandomIP(),key,key)) 
+        self.assertTrue(bdd.bdd_ajout("bbbb","aAaa#a9aa",self.CreateRandomIP(),key)) 
         self.assertTrue(bdd.CheckDbHealth())
     
     def test_CheckIP(self):
