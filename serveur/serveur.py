@@ -1,82 +1,63 @@
-#!/usr/bin/env python
+"""test_server
 
-# import asyncio
-# import websockets
+Usage:
+    dtb_user.py [--port=<int>]
 
-# async def hello(websocket):
-#     name = await websocket.recv()   # recoit le nom du client
-#     print(f"<<< {name}")
+Options:
+    --port=<int>  Port used [default=8000]
+"""
 
-#     greeting = f"Hello {name}!"
-
-#     await websocket.send(greeting)  # envoie un greeting au client
-#     print(f">>> {greeting}")
-
-#     broadcast_msg = "Hello to everyone on this server !"
-#     await websockets.broadcast(websocket, broadcast_msg)
-
-# async def main():
-#     # Open server to listen on host localhost port 8765
-#     async with websockets.serve(hello, "localhost", 8765):
-#         await asyncio.Future()  # run forever
-
-# if __name__ == "__main__":
-#     try:
-#         asyncio.run(main())
-#     except KeyboardInterrupt:
-#         print("Server stopped")
-
-
-#!/usr/bin/env python
-
-import asyncio
-import json
+import os
+import sqlite3
 import logging
-import websockets
+import json
+from docopt import docopt
+from flask import Flask
+from flask import Response
+from flask import request
+from flask import jsonify
 
-logging.basicConfig()
+APP = Flask(__name__)
 
-USERS = set()
 
-VALUE = 0
+conn = sqlite3.connect('data.db',check_same_thread=False)
+cur = conn.cursor()
+sql = "DROP TABLE IF EXISTS bdd"
+cur.execute(sql)
+conn.commit()
 
-def users_event():
-    return json.dumps({"type": "users", "count": len(USERS)})
+sql = '''CREATE TABLE bdd (
+              id INTEGER PRIMARY KEY,
+              name TEXT NOT NULL,
+              ip TEXT NOT NULL
+       );'''
+    
+cur.execute(sql)
+conn.commit()
 
-def value_event():
-    return json.dumps({"type": "value", "value": VALUE})
 
-async def counter(websocket):
-    # Envoie aux clients a sa connexion un msg sur combien il y a de users
-    # connectes
-    # Recoie des msg en json pour modifier la VALUE
-    global USERS, VALUE
-    try:
-        # Register user
-        USERS.add(websocket)
-        websockets.broadcast(USERS, users_event())
-        # Send current state to user
-        await websocket.send(value_event())
-        # Manage state changes
-        async for message in websocket:
-            event = json.loads(message)
-            print(event)
-            if event["action"] == "minus":
-                VALUE -= 1
-                websockets.broadcast(USERS, value_event())
-            elif event["action"] == "plus":
-                VALUE += 1
-                websockets.broadcast(USERS, value_event())
-            else:
-                logging.error("unsupported event: %s", event)
-    finally:
-        # Unregister user
-        USERS.remove(websocket)
-        websockets.broadcast(USERS, users_event())
+@APP.route('/isalive', methods=['GET'])
+def is_alive():
+    return Response(status=200)
 
-async def main():
-    async with websockets.serve(counter, "localhost", 8765):
-        await asyncio.Future()  # run forever
+# message received in json format
+@APP.route('/post_json', methods=['POST']) 
+def post_json():
+    data = request.get_json()
+    name = data.get('name', '')
+    ip = data.get('ip', '')
+    return data
 
-if __name__ == "__main__":
-    asyncio.run(main())
+@APP.route('/nameIp',methods=['POST'])
+def nameIp():
+
+
+if __name__ == '__main__':
+    ARGS = docopt(__doc__)
+    if ARGS['--port']:
+        APP.run(host='0.0.0.0', port=ARGS['--port'])
+    else:
+        logging.error("Wrong command line arguments")
+
+    cur.close()
+    conn.close()
