@@ -68,13 +68,6 @@ class TestBddSrv(unittest.TestCase):
         self.assertTrue(bdd.CheckUserLogin("cccc","aAaa#a9aa"))
         self.assertFalse(bdd.CheckUserLogin("cccc","aAaa#a9a")) # Bad Password
         self.assertFalse(bdd.CheckUserLogin("aaab","aAaa#a9aa")) # Bad Username
-
-    def test_CheckDbHealth(self):
-        key = self.CreateRandomString(128)
-        self.assertTrue(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key))
-        key = self.CreateRandomString(128)
-        self.assertTrue(bdd.bdd_ajout("bbbb","aAaa#a9aa",self.CreateRandomIP(),key)) 
-        self.assertTrue(bdd.CheckDbHealth())
     
     def test_CheckIP(self):
         self.assertTrue(bdd.CheckIP(self.CreateRandomIP())) # IP fonctionnelle
@@ -88,4 +81,5 @@ class TestBddSrv(unittest.TestCase):
         self.assertFalse(bdd.CheckIP("30.100.128.A")) # majuscule ascii
 
 if __name__ == '__main__':
-	unittest.main()
+    unittest.main()
+    

@@ -40,18 +40,6 @@ def CheckUserLogin(username, password):
 		return False
 	return True
 
-def CheckDbHealth():
-	cur = conn.cursor()
-	cur.execute("SELECT * FROM BDD")
-	ret = cur.fetchall()
-	if len(ret) == 0 :
-		return True # empty Db is healthy..?
-	for usr in ret :
-		if any ([not CheckUsername(usr[0]) , not CheckPassword(usr[1]),
-			not CheckIP(usr[2]) , not CheckKey(usr[3])]):
-			return False
-	return True
-
 def CheckIP(ip):
     
     List_elem=ip.split('.')
@@ -108,6 +96,7 @@ def bdd_ajout(username, password, ip, clef_pub):
     cur.execute(sql, value)
     conn.commit()
     print("Ajout d'infos")
+    bdd_affich()
     return True
 
 def bdd_affich():
