@@ -5,22 +5,75 @@ conn = sqlite3.connect('data.db')
 cur = conn.cursor()
 
 def CheckUsername(username):
-	return False
+    if len(username) <= 3 :
+        return False
+    for ch in username :
+        if not ch.isalnum() :
+            return False
+    return True
 
 def CheckPassword(password):
-	return False
+    if len(password) < 8:
+        return False
+
+    if any(not char.isalnum() for char in password) == False:
+        return False
+    if any(char.isnumeric() for char in password) == False:
+        return False
+    if any(char.isupper() for char in password) == False:
+        return False
+    if any(char.islower() for char in password) == False:
+        return False
+   
+    return True
 
 def CheckKey(key):
-	return False
+    if len(key) != 128:
+        return False
+    return True
 
 def CheckUserLogin(username, password):
-    return False
+	cur = conn.cursor()
+
+	cur.execute("SELECT password FROM users WHERE username=:username",{"username":username})
+	ret = cur.fetchall()
+	if len(ret) != 1 or password != ret[0][0] :
+		conn.close()
+		return False
+	return True
 
 def CheckDbHealth():
-    return False
+	cur = conn.cursor()
+	cur.execute("SELECT * FROM BDD")
+	ret = cur.fetchall()
+	if len(ret) == 0 :
+		return True # empty Db is healthy..?
+	for usr in ret :
+		if any ([not CheckUsername(usr[0]) , not CheckPassword(usr[1]),
+			not CheckIP(usr[2]) , not CheckKey(usr[3])]):
+			return False
+	return True
 
 def CheckIP(ip):
-    return False
+    
+    List_elem=ip.split('.')
+    is_in_limit=True
+    number_only=True
+    is_size_limit=True
+
+    if len(List_elem) != 4:
+        is_size_limit = False
+        return is_size_limit
+
+    for elem in List_elem:
+        if elem.isdecimal()==False:
+            number_only = False
+            return number_only
+        
+        if (int(elem) < 0 or int(elem) > 255):
+            is_in_limit=False
+            return is_in_limit
+    return True
 
 def bdd_creation():
 
