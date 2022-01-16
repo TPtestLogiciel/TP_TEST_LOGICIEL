@@ -52,7 +52,7 @@ class TestBddSrv(unittest.TestCase):
                         for _ in range(4))))
         print(ip)
         return ip
-
+    
     def test_Ajout(self):
         key = self.CreateRandomString(128) # nobody said anything about using 4 times the same key (yet)
         self.assertFalse(bdd.bdd_ajout("aaa","aAaa#a9aa",self.CreateRandomIP(),key)) # bad username
@@ -64,9 +64,9 @@ class TestBddSrv(unittest.TestCase):
     def test_UserLogin(self):
 		# Let's add a correct user :
         key = self.CreateRandomString(128)
-        self.assertTrue(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key))
-        self.assertTrue(bdd.CheckUserLogin("aaaa","aAaa#a9aa"))
-        self.assertFalse(bdd.CheckUserLogin("aaaa","aAaa#a9a")) # Bad Password
+        self.assertTrue(bdd.bdd_ajout("cccc","aAaa#a9aa",self.CreateRandomIP(),key))
+        self.assertTrue(bdd.CheckUserLogin("cccc","aAaa#a9aa"))
+        self.assertFalse(bdd.CheckUserLogin("cccc","aAaa#a9a")) # Bad Password
         self.assertFalse(bdd.CheckUserLogin("aaab","aAaa#a9aa")) # Bad Username
 
     def test_CheckDbHealth(self):
@@ -78,6 +78,7 @@ class TestBddSrv(unittest.TestCase):
     
     def test_CheckIP(self):
         self.assertTrue(bdd.CheckIP(self.CreateRandomIP())) # IP fonctionnelle
+        self.assertFalse(bdd.CheckIP("")) # Liste vide
         self.assertFalse(bdd.CheckIP("1.4.126.79.78")) # Taille trop grande
         self.assertFalse(bdd.CheckIP("1.2")) # Taille trop petite
         self.assertFalse(bdd.CheckIP("-128.-10.54.6")) # une valeur negative

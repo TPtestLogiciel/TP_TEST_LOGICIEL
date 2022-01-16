@@ -24,7 +24,6 @@ def CheckPassword(password):
         return False
     if any(char.islower() for char in password) == False:
         return False
-   
     return True
 
 def CheckKey(key):
@@ -35,10 +34,9 @@ def CheckKey(key):
 def CheckUserLogin(username, password):
 	cur = conn.cursor()
 
-	cur.execute("SELECT password FROM users WHERE username=:username",{"username":username})
+	cur.execute("SELECT password FROM BDD WHERE username=:username",{"username":username})
 	ret = cur.fetchall()
 	if len(ret) != 1 or password != ret[0][0] :
-		conn.close()
 		return False
 	return True
 
@@ -94,11 +92,23 @@ def bdd_creation():
     return True
 
 def bdd_ajout(username, password, ip, clef_pub):
+    test_username = CheckUsername(username)
+    test_password = CheckPassword(password)
+    test_ip = CheckIP(ip)
+    test_clef = CheckKey(clef_pub)
+    test_user_login = CheckUserLogin(username,password)
+
+    if test_user_login == True :
+        return False
+    if (test_clef and test_ip and test_password and test_username) == False:
+        return False
+    
     sql = "INSERT INTO bdd (username, password, ip, clef_pub) VALUES (?, ?, ?, ?)"
     value = (username, password, ip, clef_pub)
     cur.execute(sql, value)
     conn.commit()
     print("Ajout d'infos")
+    return True
 
 def bdd_affich():
 	cur.execute("SELECT * FROM bdd")
