@@ -45,15 +45,16 @@ def send_message(message, target_ip, target_port, user):
     server_reason = response.reason
     return data_send, server_status, server_reason
 
-
 def compose_message(target_ip, target_port, user):
     print("In compose_message (thread1)")
     while(True):
         text_input = input('>> ')
-        print("text ", text_input)
-        if text_input == 'quit':
-            break
+        # print("text ", text_input)
+        # if text_input == 'quit':
+            # break
         data_send, server_status,server_reason = send_message(text_input, target_ip, target_port, user)
+    # return data_send, server_status, server_reason
+    # sys.exit(0)
 
 
 def server(ipaddress, local_port, user):
@@ -77,11 +78,12 @@ if __name__ == '__main__':
     target_port = ARGS['--port_dest']
     ip = ARGS['--ip']
     source_port = ARGS['--port_source']
-
-    thread1 = threading.Thread(target=compose_message, args=(target_ip, target_port, user))
-    thread2 = threading.Thread(target=server, args=(ip, source_port, user))
-    thread1.start()
-    thread2.start()
-    thread1.join()
-    thread2.join()
-
+    try:
+        thread1 = threading.Thread(target=compose_message, args=(target_ip, target_port, user))
+        thread2 = threading.Thread(target=server, args=(ip, source_port, user))
+        thread1.start()
+        thread2.start()
+        thread1.join()
+        thread2.join()
+    except KeyboardInterrupt:
+        print("Press Ctrl+C to remove server part")
