@@ -56,7 +56,6 @@ class TestP2PClient(unittest.TestCase):
         # Test response and connection to server Ground with client Air with a string msg
         dataSend, serverStatus, serverReason = p2p_client.send_message(self.msgFromAir, self.ip, self.portUser2, self.buddyUsr1)
         dataSend = json.loads(dataSend)
-        print("DataSend by Air to Ground : ", dataSend)
         self.assertEqual(dataSend['text'], self.msgJsonAir['text'])
         self.assertEqual(dataSend['username'], self.msgJsonAir['username'])
         self.assertEqual(dataSend, self.msgJsonAir)
@@ -66,10 +65,18 @@ class TestP2PClient(unittest.TestCase):
         # Test response and connection to server Ground with client Air with an int msg
         dataSend, serverStatus, serverReason = p2p_client.send_message(123456789, self.ip, self.portUser2, self.buddyUsr1)
         dataSend = json.loads(dataSend)
-        print("DataSend by Air to Ground : ", dataSend)
         self.assertNotEqual(dataSend['text'], self.msgJsonAir['text'])
+        self.assertEqual(dataSend['text'], 123456789)
         self.assertEqual(dataSend['username'], self.msgJsonAir['username'])
         self.assertNotEqual(dataSend, self.msgJsonAir)
+        self.assertEqual(serverStatus, 200)
+        self.assertEqual(serverReason, "OK")
+
+        # Test response and connection to server Ground with client Air with an empty string
+        dataSend, serverStatus, serverReason = p2p_client.send_message("", self.ip, self.portUser2, self.buddyUsr1)
+        dataSend = json.loads(dataSend)
+        self.assertEqual(dataSend['text'], "")
+        self.assertEqual(dataSend['username'], self.msgJsonAir['username'])
         self.assertEqual(serverStatus, 200)
         self.assertEqual(serverReason, "OK")
 
