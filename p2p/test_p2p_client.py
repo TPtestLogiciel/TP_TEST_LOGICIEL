@@ -93,6 +93,19 @@ class TestP2PClient(unittest.TestCase):
         self.assertEqual(serverStatus, 200)
         self.assertEqual(serverReason, "OK")
 
+        # Test response and connection to server Ground with client Air with a list
+        listMsg = ["bonjour", "comment tu vas?", 4, "byebye", 8]
+        dataSend, serverStatus, serverReason = p2p_client.send_message(listMsg, self.ip, self.portUser2, self.buddyUsr1)
+        dataSend = json.loads(dataSend)
+        self.assertEqual(dataSend['text'], listMsg)
+        self.assertEqual(dataSend['text'][0], listMsg[0])
+        self.assertNotEqual(dataSend['text'][2], listMsg[0])
+        self.assertEqual(dataSend['text'][2], listMsg[2])
+        self.assertNotEqual(dataSend['text'], self.msgJsonAir['text'])
+        self.assertEqual(dataSend['username'], self.msgJsonAir['username'])
+        self.assertEqual(serverStatus, 200)
+        self.assertEqual(serverReason, "OK")
+
 
     def tearDown(self):
         print("killing subprocess user_server")
