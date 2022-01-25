@@ -9,6 +9,8 @@ inputs:
 outputs:
   time: # id of output
     description: 'The time we greeted you'
+  workflow_log: # id of output
+    description: 'Exporting log'
 runs:
   using: 'docker'
   image: 'Dockerfile'
