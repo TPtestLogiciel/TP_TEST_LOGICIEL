@@ -11,13 +11,15 @@ import io
 import sys
 
 
-#Pour generer une cle publique et privé :
-# $ openssl genrsa -aes128 -passout pass:<phrase> -out private.pem 4096
-# $ openssl rsa -in private.pem -passin pass:<phrase> -pubout -out public.pem
+#Pour generer une cle privé :
+# $ openssl genrsa -aes128 -passout pass:<password> -out private.pem 4096
+
+#Pour generer une cle publique a partir de la cle privé
+# $ openssl rsa -in private.pem -passin pass:<password> -pubout -out public.pem
 
 #Pour generer un certificat a partir de la cle privé
 # $ openssl req -new -x509 -sha256 -key private.pem -out cert.pem -days <int>
-
+# NE PAS OUBLIER DE MODIFIER LES PATH DANS LES VARIABLES
 
 class TestP2PClient(unittest.TestCase):
 
@@ -36,6 +38,11 @@ class TestP2PClient(unittest.TestCase):
     msgJsonAir = {'username': buddyUsr1, 'text': msgFromAir}
     
     certificate_from_air="/home/steven/cert.pem" #path du certificat.pem
+    privatekey = "/home/steven/private.pem"
+    password = "azertyuiop"
+    message_to_sign = "Message à signer"
+    certificate2 ="home/steven/cert2.pem"
+
 
     def setUp(self):
         # Launch User1 Ground terminal
@@ -188,6 +195,41 @@ class TestP2PClient(unittest.TestCase):
         self.assertEqual((dataSend['clef_pub'][-26:]), '-----END CERTIFICATE-----\n')
 
         
+
+    def test_sign&verif_message(self)
+        #Test message signé et verification de la signature
+        (signed_message,sign) = sign_message(message_to_sign,private_key,password)
+        
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        verify_sign(signed_message,sign,certificate)
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Message is signed\n",get_printed_output.getvalue())
+
+        #Test Vérification d'un message non signé et d'une signature random
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        verify_sign(message_to_sign,sign,certificate)
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Message is not signed\n",get_printed_output.getvalue())
+
+        #Test message signé puis modification du message et verification signature
+        (signed_message,sign) = sign_message(message_to_sign,private_key,password)
+        signed_message += "Modification du message" 
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        verify_sign(signed_message,sign,certificate)
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Message is not signed\n",get_printed_output.getvalue())
+
+        #Test message signé et Vérification avec un autre certificat
+        (signed_message,sign) = sign_message(message_to_sign,private_key,password)
+        signed_message += "Modification du message" 
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        verify_sign(signed_message,sign,cert2)
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Message is not signed\n",get_printed_output.getvalue())
 
 
 if __name__ == '__main__':

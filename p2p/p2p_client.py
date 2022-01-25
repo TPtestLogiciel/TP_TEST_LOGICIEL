@@ -35,7 +35,7 @@ app = Flask(__name__)
 
 def send_certificate(certificate, target_ip, target_port, username):
     """
-    Arguments : public_key a envoyer, l'adresse IP du destinataire,
+    Arguments : certificate a envoyer (.pem), l'adresse IP du destinataire,
     le port du destinataire et son username.
     - Creation d'une connexion HTTP avec l'IP et le port destinataire
     - Envoi d'un JSON avec l'username du destinataire et le coeur
@@ -76,6 +76,11 @@ def send_certificate(certificate, target_ip, target_port, username):
         print("Failed to connect to server. Try again later.")
         return -1, -1, -1
 
+def sign_message(message,private_key,password)
+    return -1
+
+def verify_sign(message,signature,certificate)
+    return -1
 
 def send_message(message, target_ip, target_port, username):
     """
