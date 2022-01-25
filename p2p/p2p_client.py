@@ -13,12 +13,10 @@ Options:
 
 import http.client
 import json
-import logging
-import sys
 import threading
 
 from docopt import docopt
-from flask import Flask, Response, request
+from flask import Flask, request
 
 app = Flask(__name__)
 # app.debug = True
@@ -63,12 +61,7 @@ def compose_message(target_ip, target_port, user):
     """
     while(True):
         text_input = input('>> ')
-        (data_send, 
-        server_status,
-        server_reason) = send_message(text_input,
-                                      target_ip,
-                                      target_port,
-                                      user)
+        send_message(text_input, target_ip, target_port, user)
 
 
 def server(ip_address, local_port, user):
