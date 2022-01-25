@@ -33,14 +33,7 @@ app = Flask(__name__)
 # app.debug = True
 
 
-#Pour generer une cle publique et privé :
-# $ openssl genrsa -aes128 -passout pass:<phrase> -out private.pem 4096
-# $ openssl rsa -in private.pem -passin pass:<phrase> -pubout -out public.pem
-
-#Pour generer un certificat a partir de la cle privé
-# $ openssl req -new -x509 -sha256 -key private.pem -out cert.pem -days <int>
-
-def send_public_key(public_key, target_ip, target_port, username):
+def send_certificate(certificate, target_ip, target_port, username):
     """
     Arguments : public_key a envoyer, l'adresse IP du destinataire,
     le port du destinataire et son username.
@@ -54,23 +47,23 @@ def send_public_key(public_key, target_ip, target_port, username):
     """
     # print("-- post function called --")
     
-    if os.path.exists(public_key):
-        last_four_char = public_key[-4:]
+    if os.path.exists(certificate):
+        last_four_char = certificate[-4:]
         if (last_four_char == ".pem"):
-            key_file = open(public_key,mode='r')
-            key_content = key_file.read()        
-            key_file.close()
+            certificate_file = open(certificate,mode='r')
+            certificate_content = certificate_file.read()        
+            certificate_file.close()
         else : 
-            print("Erreur : Le fichier n'est pas une clé publique")
+            print("Error : File is not a certificate")
             return -1,-1,-1
     else:
-        print("Erreur : Le fichier n'existe pas")
+        print("Error : File does not exist")
         return -1,-1,-1
     
     try:
         conn = http.client.HTTPConnection(target_ip, target_port)
         headers = {'Content-Type': 'application/json'}
-        dataToServer = {'username': username, 'clef_pub': key_content}
+        dataToServer = {'username': username, 'clef_pub': certificate_content}
         jsonData = json.dumps(dataToServer)
         
         conn.request('POST', '/p2p_post_key', jsonData, headers)

@@ -10,6 +10,15 @@ import p2p_client
 import io
 import sys
 
+
+#Pour generer une cle publique et privé :
+# $ openssl genrsa -aes128 -passout pass:<phrase> -out private.pem 4096
+# $ openssl rsa -in private.pem -passin pass:<phrase> -pubout -out public.pem
+
+#Pour generer un certificat a partir de la cle privé
+# $ openssl req -new -x509 -sha256 -key private.pem -out cert.pem -days <int>
+
+
 class TestP2PClient(unittest.TestCase):
 
     user1Subprocess = None
@@ -26,8 +35,7 @@ class TestP2PClient(unittest.TestCase):
     msgFromAir = "Hi Ground, it's a message from Air!"
     msgJsonAir = {'username': buddyUsr1, 'text': msgFromAir}
     
-    #Variable pour test crypto
-    key_from_air="/home/steven/cert.pem" #path du certificat.pem
+    certificate_from_air="/home/steven/cert.pem" #path du certificat.pem
 
     def setUp(self):
         # Launch User1 Ground terminal
@@ -151,24 +159,24 @@ class TestP2PClient(unittest.TestCase):
 
 
     #Test de la fonction send_public_key()
-    def test_send_public_key(self):
+    def test_certificate_key(self):
 
         #Test du fichier envoyé
         get_printed_output = io.StringIO()
         sys.stdout = get_printed_output
-        self.assertEqual(p2p_client.send_public_key("fichier_inexistant","0.0.0.0","8000","8080"),(-1,-1,-1))
+        self.assertEqual(p2p_client.send_certificate("file_not_found","0.0.0.0","8000","8080"),(-1,-1,-1))
         sys.stdout = sys.__stdout__
-        self.assertEqual("Erreur : Le fichier n'existe pas\n",get_printed_output.getvalue())
+        self.assertEqual("Error : File does not exist\n",get_printed_output.getvalue())
 
         get_printed_output = io.StringIO()
         sys.stdout = get_printed_output
-        self.assertEqual(p2p_client.send_public_key("p2p_client.py","0.0.0.0","8000","8080"),(-1,-1,-1))
+        self.assertEqual(p2p_client.send_certificate("p2p_client.py","0.0.0.0","8000","8080"),(-1,-1,-1))
         sys.stdout = sys.__stdout__
-        self.assertEqual("Erreur : Le fichier n'est pas une clé publique\n",get_printed_output.getvalue())
+        self.assertEqual("Error : File is not a certificate\n",get_printed_output.getvalue())
 
         (dataSend,
             serverStatus, 
-            serverReason) = p2p_client.send_public_key(self.key_from_air,
+            serverReason) = p2p_client.send_certificate(self.certificate_from_air,
                                                         self.ip,
                                                         self.portUser2, 
                                                         self.buddyUsr1)
@@ -179,7 +187,7 @@ class TestP2PClient(unittest.TestCase):
         self.assertEqual(dataSend['clef_pub'][:28], '-----BEGIN CERTIFICATE-----\n')
         self.assertEqual((dataSend['clef_pub'][-26:]), '-----END CERTIFICATE-----\n')
 
-
+        
 
 
 if __name__ == '__main__':
