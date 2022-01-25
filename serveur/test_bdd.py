@@ -47,7 +47,7 @@ class TestBddSrv(unittest.TestCase):
 		)
         self.assertFalse(bdd.CheckKey(""))
 
-    def CreateRandomIP():
+    def CreateRandomIP(self):
         ip_temp = ".".join(map(str, (random.randint(0, 255) 
                         for _ in range(4))))
         ip=ip_temp + ":"
@@ -83,6 +83,11 @@ class TestBddSrv(unittest.TestCase):
         self.assertFalse(bdd.CheckIP("30.100.128.a")) # lettre ascii
         self.assertFalse(bdd.CheckIP("30.100.128.#")) # caractere special
         self.assertFalse(bdd.CheckIP("30.100.128.A")) # majuscule ascii
+        
+        self.assertFalse(bdd.CheckIP("30.100.128.12:")) # Ip fonctionelle port vide 
+        self.assertFalse(bdd.CheckIP("30.100.128.12:-60")) # port negatif
+        self.assertFalse(bdd.CheckIP("30.100.128.12:afdeh")) # port non numeric
+        self.assertFalse(bdd.CheckIP("30.100.128.12:108:200:300")) # plusieur ports
 
 if __name__ == '__main__':
     unittest.main()
