@@ -41,7 +41,7 @@ def send_message(message, target_ip, target_port, username):
         data_to_server = {'username': username, 'text': message}
         json_data = json.dumps(data_to_server)
         print(json_data)
-        
+
         conn.request('POST', '/p2p_post', json_data, http_headers)
         server_response = conn.getresponse()
         msg_received = server_response.read().decode()

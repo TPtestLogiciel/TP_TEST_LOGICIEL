@@ -25,8 +25,8 @@ class TestP2PClient(unittest.TestCase):
         # Launch User1 Ground terminal
         cmd_ground = "python3 p2p_client.py --buddy={} --port_dest={}\
                     --port_source={}".format(self.buddy_usr_2,
-                                             self.port_user_1,
-                                             self.port_user_2)
+                                            self.port_user_1,
+                                            self.port_user_2)
         args_ground = shlex.split(cmd_ground)
         # launch command as a subprocess
         self.user_subprocess = subprocess.Popen(args_ground)
@@ -44,8 +44,8 @@ class TestP2PClient(unittest.TestCase):
                                                     self.buddy_usr_1)
         data_send = json.loads(data_send)
         self.assertEqual(data_send['text'], self.msg_json_air['text'])
-        self.assertEqual(data_send['username'], 
-                         self.msg_json_air['username'])
+        self.assertEqual(data_send['username'],
+                        self.msg_json_air['username'])
         self.assertEqual(data_send, self.msg_json_air)
         self.assertEqual(server_status, 200)
         self.assertEqual(server_reason, "OK")
@@ -61,22 +61,22 @@ class TestP2PClient(unittest.TestCase):
         data_send = json.loads(data_send)
         self.assertNotEqual(data_send['text'], self.msg_json_air['text'])
         self.assertEqual(data_send['text'], 123456789)
-        self.assertEqual(data_send['username'], 
-                         self.msg_json_air['username'])
+        self.assertEqual(data_send['username'],
+                        self.msg_json_air['username'])
         self.assertNotEqual(data_send, self.msg_json_air)
         self.assertEqual(server_status, 200)
         self.assertEqual(server_reason, "OK")
 
         # Test response and connection to server Ground with client
         # Air with an empty string
-        (data_send, 
-            server_status, 
+        (data_send,
+            server_status,
             server_reason) = p2p_client.send_message("", self.ip_address,
                                                     self.port_user_2,
                                                     self.buddy_usr_1)
         data_send = json.loads(data_send)
         self.assertEqual(data_send['text'], "")
-        self.assertEqual(data_send['username'], 
+        self.assertEqual(data_send['username'],
                             self.msg_json_air['username'])
         self.assertEqual(server_status, 200)
         self.assertEqual(server_reason, "OK")
@@ -97,7 +97,7 @@ class TestP2PClient(unittest.TestCase):
         dico_msg = json.loads(dico_msg)
         self.assertEqual(data_send['text'], dico_msg['text'])
         self.assertNotEqual(data_send['text'], self.msg_json_air['text'])
-        self.assertEqual(data_send['username'], 
+        self.assertEqual(data_send['username'],
                             self.msg_json_air['username'])
         self.assertEqual(data_send['text']['username'],
                             self.msg_json_air['username'])
@@ -105,11 +105,11 @@ class TestP2PClient(unittest.TestCase):
         self.assertEqual(server_reason, "OK")
 
         # Test response and connection to server Ground with client
-         # Air with a list
+        # Air with a list
         list_msg = ["bonjour", "comment tu vas?", 4, "byebye", 8]
-        (data_send, 
-            server_status, 
-            server_reason) = p2p_client.send_message(list_msg, 
+        (data_send,
+            server_status,
+            server_reason) = p2p_client.send_message(list_msg,
                                                     self.ip_address,
                                                     self.port_user_2,
                                                     self.buddy_usr_1)
@@ -124,7 +124,6 @@ class TestP2PClient(unittest.TestCase):
                         self.msg_json_air['username'])
         self.assertEqual(server_status, 200)
         self.assertEqual(server_reason, "OK")
-
 
 
     def tearDown(self):
