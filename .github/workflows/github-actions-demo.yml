@@ -31,4 +31,15 @@ jobs:
       - name: Get the ls directory
         run: echo "ls was ${{ steps.hello.outputs.workflow_log }}"
       - run: echo "🍏 This job's status is ${{ job.status }}."
-
+      - name: Hello world action step
+        uses: ./ # Uses an action in the root directory
+        id: hello
+        with:
+          who-to-greet: 'echo("Mona the Octocat")'
+      # Use the output from the `hello` step
+      - name: Get the output time
+        run: echo "The time was ${{ steps.hello.outputs.time }}"
+      - name: Get myvar1
+        run: echo "Myvar1 was ${{ steps.hello.outputs.myvar1 }}"
+      - name: Get myvar2
+        run: echo "Myvar2 was ${{ steps.hello.outputs.myvar2 }}"

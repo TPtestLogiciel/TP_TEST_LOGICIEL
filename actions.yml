@@ -4,13 +4,15 @@ description: 'Greet someone and record the time'
 inputs:
   who-to-greet:  # id of input
     description: 'Who to greet'
-    required: false
+    required: true
     default: 'World'
 outputs:
   time: # id of output
     description: 'The time we greeted you'
-  workflow_log: # id of output
-    description: 'Exporting log'
+  myvar1: # id of output
+    description: 'Myvar1'
+  myvar2: # id of output
+    description: 'Myvar2'
 runs:
   using: 'docker'
   image: 'Dockerfile'
