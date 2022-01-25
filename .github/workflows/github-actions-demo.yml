@@ -20,16 +20,6 @@ jobs:
       - name: Verify all Python files using Pylint
         run: |
           find . -type f -name "*.py" | xargs /home/maxime/.local/bin/pylint || true
-      - name: Hello world action step
-        uses: ./ # Uses an action in the root directory
-        id: hello
-        #with:
-        #  who-to-greet: 'Mona the Octocat'
-      # Use the output from the `hello` step
-      - name: Get the output time
-        run: echo "The time was ${{ steps.hello.outputs.time }}"
-      - name: Get the ls directory
-        run: echo "ls was ${{ steps.hello.outputs.workflow_log }}"
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Hello world action step
         uses: ./ # Uses an action in the root directory
