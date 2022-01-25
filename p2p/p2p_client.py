@@ -19,16 +19,13 @@ from docopt import docopt
 from flask import Flask, request
 
 app = Flask(__name__)
-# app.debug = True
 
 
 def send_message(message, target_ip, target_port, username):
     """
-    Envoi un message a la partie serveur du destinataire.
-    Retourne le message recu par le serveur, le status du serveur et
-    la raison associee.
+    Send message to server of username. Return received message by username's
+    server, server status and its reason.
     """
-    # print("-- post function called --")
     try:
         conn = http.client.HTTPConnection(target_ip, target_port)
         http_headers = {"Content-Type": "application/json"}
@@ -49,8 +46,7 @@ def send_message(message, target_ip, target_port, username):
 
 def compose_message(target_ip, target_port, user):
     """
-    Demande a l'utilisateur un message en input pour envoyer au
-    destinataire.
+    Ask to enter a message as an input to be sent to user.
     """
     while True:
         text_input = input(">> ")
@@ -59,8 +55,7 @@ def compose_message(target_ip, target_port, user):
 
 def server(ip_address, local_port, user):
     """
-    Creer un serveur avec une adresse ip et un port passes en
-    arguments
+    Create server with ip address and port.
     """
     app.run(host=ip_address, port=local_port)
 
@@ -68,7 +63,7 @@ def server(ip_address, local_port, user):
 @app.route("/p2p_post", methods=["POST"])
 def p2p_post():
     """
-    Recoit le message d'un client et l'affiche dans la console
+    Receive and display client's message.
     """
     data = request.get_json()
     text = data.get("text", "")
