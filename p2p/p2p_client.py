@@ -24,13 +24,7 @@ app = Flask(__name__)
 
 def send_message(message, target_ip, target_port, username):
     """
-    Arguments : message a envoyer, l'adresse IP du destinataire,
-    le port du destinataire et son username.
-    - Creation d'une connexion HTTP avec l'IP et le port destinataire
-    - Envoi d'un JSON avec l'username du destinataire et le coeur
-    du message
-    - Requete POST a la partie serveur du destinataire
-    - Recupere les reponses de la partie serveur du destinataire
+    Envoi un message a la partie serveur du destinataire.
     Retourne le message recu par le serveur, le status du serveur et
     la raison associee.
     """
@@ -55,8 +49,6 @@ def send_message(message, target_ip, target_port, username):
 
 def compose_message(target_ip, target_port, user):
     """
-    Arguments : adresse IP du destinataire, le port du destinataire,
-    username du destinataire
     Demande a l'utilisateur un message en input pour envoyer au
     destinataire.
     """
