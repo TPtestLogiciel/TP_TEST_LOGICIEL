@@ -1,8 +1,8 @@
 import sqlite3
 import os
 
-conn = sqlite3.connect('data.db')
-cur = conn.cursor()
+# conn = sqlite3.connect('data.db')
+# cur = conn.cursor()
 
 def CheckUsername(username):
     if len(username) <= 3 :
@@ -32,13 +32,18 @@ def CheckKey(key):
     return True
 
 def CheckUserLogin(username, password):
-	cur = conn.cursor()
+    # conn = sqlite3.connect('data.db')
+    # cur = conn.cursor()
+    conn = sqlite3.connect('data.db')
+    cur = conn.cursor()
 
-	cur.execute("SELECT password FROM BDD WHERE username=:username",{"username":username})
-	ret = cur.fetchall()
-	if len(ret) != 1 or password != ret[0][0] :
-		return False
-	return True
+    cur.execute("SELECT password FROM BDD WHERE username=:username",{"username":username})
+    ret = cur.fetchall()
+
+    conn.close()
+    if len(ret) != 1 or password != ret[0][0] :
+        return False
+    return True
 
 def CheckIP(ip):
     
@@ -62,6 +67,8 @@ def CheckIP(ip):
     return True
 
 def bdd_creation():
+    conn = sqlite3.connect('data.db')
+    cur = conn.cursor()
 
     sql = "DROP TABLE IF EXISTS BDD"
     cur.execute(sql)
@@ -70,16 +77,21 @@ def bdd_creation():
     sql = '''CREATE TABLE BDD (
                   username TEXT NOT NULL,
                   password TEXT NOT NULL,
-				  ip TEXT NOT NULL,
-				  clef_pub TEXT NOT NULL
+                  ip TEXT NOT NULL,
+                  clef_pub TEXT NOT NULL
            );'''
-	
+    
     cur.execute(sql)
     conn.commit()
+    conn.close()
     print("Base de données crée et correctement connectée à SQLite")
     return True
 
 def bdd_ajout(username, password, ip, clef_pub):
+
+    conn = sqlite3.connect('data.db')
+    cur = conn.cursor()
+
     test_username = CheckUsername(username)
     test_password = CheckPassword(password)
     test_ip = CheckIP(ip)
@@ -95,18 +107,56 @@ def bdd_ajout(username, password, ip, clef_pub):
     value = (username, password, ip, clef_pub)
     cur.execute(sql, value)
     conn.commit()
+
+    conn.close()
     print("Ajout d'infos")
     bdd_affich()
     return True
 
+def bdd_ajout(username, password, ip, clef_pub):
+    conn = sqlite3.connect('data.db')
+    cur = conn.cursor()
+
+    test_username = CheckUsername(username)
+    test_password = CheckPassword(password)
+    test_ip = CheckIP(ip)
+    test_clef = CheckKey(clef_pub)
+    test_user_login = CheckUserLogin(username,password)
+
+    if test_username==False:
+        return 455
+    elif test_ip==False:
+        return 456
+    elif test_password==False:
+        return 457
+
+    elif test_clef==False:
+        return 458
+    elif test_user_login==True:
+        return 459
+
+    
+    sql = "INSERT INTO bdd (username, password, ip, clef_pub) VALUES (?, ?, ?, ?)"
+    value = (username, password, ip, clef_pub)
+    cur.execute(sql, value)
+    conn.commit()
+
+    conn.close()
+    print("Ajout d'infos")
+    bdd_affich()
+    return 1
+
 def bdd_affich():
-	cur.execute("SELECT * FROM bdd")
-	result = cur.fetchall()
-	for row in result:
-		print(row)
-		print("\n")
+    conn = sqlite3.connect('data.db')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM bdd")
+    result = cur.fetchall()
+    for row in result:
+        print(row)
+        print("\n")
+    conn.close()
 
 def bdd_fermer():
-	cur.close()
-	conn.close()
-	print("Connexion SQLite est fermée")
+    cur.close()
+    conn.close()
+    print("Connexion SQLite est fermée")
