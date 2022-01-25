@@ -16,7 +16,7 @@ jobs:
           ls ${{ github.workspace }}
       - name: Verify all Python files using Pylint
         run: |
-          find . -type f -name "*.py" | xargs pylint || true
+          \find . -type f -name "*.py" | xargs pylint || true
       - name: Hello world action step
         id: hello
         uses: actions/hello-world-docker-action@v1
