@@ -63,20 +63,23 @@ def nameIp():
     if not payload['name']:
         code="455"
         error = 'name is required.'
-        print("Error",code,error)
-        return code
+        print("|!| Error: ",code,error)
+        # return code
+        return Response(status=code)
     elif not payload['ip']:
         code="456"
         error = 'ip is required.'
-        print("Error",code,error)
-        return code
+        print("|!| Error: ",code,error)
+        # return code
+        return Response(status=code)
     elif cur.execute(
         'SELECT id FROM bdd WHERE name = ?', (payload['name'],)
     ).fetchone() is not None:
         code="457"
         error = 'User {} is already registered.'.format(name)
         print("Error",code,error)
-        return code
+        # return code
+        return Response(status=code)
 
     if error is None:
         cur.execute(

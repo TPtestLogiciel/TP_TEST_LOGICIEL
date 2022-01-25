@@ -37,7 +37,7 @@ class TestUserSrv(unittest.TestCase):
 		response=requests.post(self.SrvUrl+"/nameIp",json={"name":"","ip":"0.0.0.4"})
 		self.assertEqual(response.status_code,455)
 		response=requests.post(self.SrvUrl+"/nameIp",json={"name":"Mister","ip":""})
-		self.assertEqual(response.status_code,455)
+		self.assertEqual(response.status_code,456)
 
 
 
