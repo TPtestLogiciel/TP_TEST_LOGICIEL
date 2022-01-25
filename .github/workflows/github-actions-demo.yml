@@ -16,6 +16,6 @@ jobs:
           ls ${{ github.workspace }}
       - name: Verify all Python files using Pylint
         run: |
-          find . -type f -name "*.py" | xargs pylint || true
+          find . -type f -name "*.py" | xargs /home/maxime/.local/bin/pylint || true
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
