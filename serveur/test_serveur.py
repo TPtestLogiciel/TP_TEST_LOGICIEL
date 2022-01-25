@@ -8,7 +8,7 @@ class TestUserSrv(unittest.TestCase):
 
 	SrvSubprocess = None
 
-	TestPort = "99"
+	TestPort = "5000"
 	SrvAddr = "127.0.0.1"
 	SrvUrl = "http://" + SrvAddr + ":" + TestPort
 
@@ -31,6 +31,13 @@ class TestUserSrv(unittest.TestCase):
 	def test_nameIp(self):
 		response=requests.post(self.SrvUrl+"/nameIp",json={"name":"Mohamed","ip":"0.0.0.2"})
 		self.assertEqual(response.status_code,200)
+
+		#régler les erreurs aux tests ci-dessous et 
+		#rajouter des tests pour cas où on envoie pas tous les champs
+		response=requests.post(self.SrvUrl+"/nameIp",json={"name":"","ip":"0.0.0.4"})
+		self.assertEqual(response.status_code,455)
+		response=requests.post(self.SrvUrl+"/nameIp",json={"name":"Mister","ip":""})
+		self.assertEqual(response.status_code,455)
 
 
 

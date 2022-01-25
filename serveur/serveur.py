@@ -50,7 +50,41 @@ def post_json():
 
 @APP.route('/nameIp',methods=['POST'])
 def nameIp():
+   # if request.method == 'POST':
+    payload=request.json
+    print("payload:",payload)
+    # name = request.form['name']
+    # ip = request.form['ip']
+    # db = "data.db"
+    
+    # name =payload['name']
+    error = None
+    code=None
+    if not payload['name']:
+        code="455"
+        error = 'name is required.'
+        print("Error",code,error)
+        return code
+    elif not payload['ip']:
+        code="456"
+        error = 'ip is required.'
+        print("Error",code,error)
+        return code
+    elif cur.execute(
+        'SELECT id FROM bdd WHERE name = ?', (payload['name'],)
+    ).fetchone() is not None:
+        code="457"
+        error = 'User {} is already registered.'.format(name)
+        print("Error",code,error)
+        return code
 
+    if error is None:
+        cur.execute(
+            'INSERT INTO bdd (name, ip) VALUES (?, ?)',
+            (payload['name'], payload['ip'])
+        )
+        conn.commit()
+    return payload
 
 if __name__ == '__main__':
     ARGS = docopt(__doc__)
