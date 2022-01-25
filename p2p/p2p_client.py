@@ -21,10 +21,19 @@ from flask import request
 import http.client
 import json
 
+import os
+import hashlib
+
+import OpenSSL
+from OpenSSL import crypto
+import base64
+
 
 app = Flask(__name__)
 # app.debug = True
 
+def send_public_key(public_key, target_ip, target_port, username):
+    return -1
 
 def send_message(message, target_ip, target_port, username):
     """
@@ -89,7 +98,18 @@ def p2p_post():
     data = request.get_json()
     text = data.get('text', '')
     ip = data.get('ip', '')
-    print("<< {} : {}".format(user, text))
+    clef_publique = data.get('clef_pub', '')
+    print("<< {} : {}".format(user, text,clef_publique))
+    return data
+
+@app.route('/p2p_post_key', methods=['POST']) 
+def p2p_post_key():
+    """
+    Recoit le message d'un client et l'affiche dans la console
+    """
+    data = request.get_json()
+    clef_publique = data.get('clef_pub', '')
+    print("<< {} : {}".format(user, clef_publique))
     return data
 
 

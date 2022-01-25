@@ -7,6 +7,8 @@ import json
 import http.client
 import p2p_client
 
+import io
+import sys
 
 class TestP2PClient(unittest.TestCase):
 
@@ -23,7 +25,9 @@ class TestP2PClient(unittest.TestCase):
     msgJsonGround = {'username': buddyUsr2, 'text': msgFromGround}
     msgFromAir = "Hi Ground, it's a message from Air!"
     msgJsonAir = {'username': buddyUsr1, 'text': msgFromAir}
-
+    
+    #Variable pour test crypto
+    key_from_air="/home/steven/cert.pem" #path du certificat.pem
 
     def setUp(self):
         # Launch User1 Ground terminal
@@ -144,6 +148,39 @@ class TestP2PClient(unittest.TestCase):
         print("killing subprocess user_server")
         self.user1Subprocess.kill()
         self.user1Subprocess.wait()
+
+
+    #Test de la fonction send_public_key()
+    def test_send_public_key(self):
+
+        #Test du fichier envoyé
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        self.assertEqual(p2p_client.send_public_key("fichier_inexistant","0.0.0.0","8000","8080"),-1)
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Erreur : Le fichier n'existe pas\n",get_printed_output.getvalue())
+
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        self.assertEqual(p2p_client.send_public_key("p2p_client.py","0.0.0.0","8000","8080"),-1)
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Erreur : Le fichier n'est pas une clé publique\n",get_printed_output.getvalue())
+
+        (dataSend,
+            serverStatus, 
+            serverReason) = p2p_client.send_public_key(self.key_from_air,
+                                                        self.ip,
+                                                        self.portUser2, 
+                                                        self.buddyUsr1)
+        dataSend = json.loads(dataSend)
+
+        #test contenu du fichier 
+        self.assertEqual(len(dataSend['clef_pub']), 1428)
+        self.assertEqual(dataSend['clef_pub'][:28], '-----BEGIN CERTIFICATE-----\n')
+        self.assertEqual((dataSend['clef_pub'][-26:]), '-----END CERTIFICATE-----\n')
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
