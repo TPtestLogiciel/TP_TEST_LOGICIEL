@@ -21,8 +21,8 @@ jobs:
         run: |
           find . -type f -name "*.py" | xargs /home/maxime/.local/bin/pylint || true
       - name: Hello world action step
+        uses: ./ # Uses an action in the root directory
         id: hello
-        uses: actions/hello-world-docker-action@v1
         with:
           who-to-greet: 'Mona the Octocat'
       # Use the output from the `hello` step
