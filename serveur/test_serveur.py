@@ -45,24 +45,24 @@ class TestUserSrv(unittest.TestCase):
         self.assertEqual(response.status_code,200)
 
 
-    def test_nameIp(self):
+    def test_register(self):
         key1 = self.CreateRandomString(64)
-        response=requests.post(self.SrvUrl+"/nameIp",json={"name":"Mohamed","pwd":"aAaa#a9aa","ip":"192.0.0.2","key":key1})
+        response=requests.post(self.SrvUrl+"/register",json={"name":"Mohamed","pwd":"aAaa#a9aa","ip":"192.0.0.2","key":key1})
         self.assertEqual(response.status_code,200)
 
-        #name vide
-        response=requests.post(self.SrvUrl+"/nameIp",json={"name":"","pwd":"aAaa#a9aa","ip":"0.0.0.4","key":key1})
+        #field name empty
+        response=requests.post(self.SrvUrl+"/register",json={"name":"","pwd":"aAaa#a9aa","ip":"0.0.0.4","key":key1})
         self.assertEqual(response.status_code,455)
-        #ip vide
-        response=requests.post(self.SrvUrl+"/nameIp",json={"name":"Ekdc","pwd":"aAaa#a9aa","ip":"","key":key1})
+        #field ip empty
+        response=requests.post(self.SrvUrl+"/register",json={"name":"Ekdc","pwd":"aAaa#a9aa","ip":"","key":key1})
         self.assertEqual(response.status_code,456)
 
-        #pwd vide
-        response=requests.post(self.SrvUrl+"/nameIp",json={"name":"Dkd5","pwd":"","ip":"192.0.0.8","key":key1})
+        #field pwd empty
+        response=requests.post(self.SrvUrl+"/register",json={"name":"Dkd5","pwd":"","ip":"192.0.0.8","key":key1})
         self.assertEqual(response.status_code,457)
 
-        #key vide
-        response=requests.post(self.SrvUrl+"/nameIp",json={"name":"Mokdfz","pwd":"aAaa#a9aa","ip":"192.0.0.5","key":""})
+        #field key empty
+        response=requests.post(self.SrvUrl+"/register",json={"name":"Mokdfz","pwd":"aAaa#a9aa","ip":"192.0.0.5","key":""})
         self.assertEqual(response.status_code,458)
 
 if __name__ == '__main__':
