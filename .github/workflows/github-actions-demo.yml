@@ -16,10 +16,10 @@ jobs:
           ls ${{ github.workspace }}
       - name: Which pylint
         run: |
-          which pylint
+          pip3 install pylint
       - name: Verify all Python files using Pylint
         run: |
-          find . -type f -name "*.py" | xargs /Library/Frameworks/Python.framework/Versions/3.8/bin/pylint || true
+          find . -type f -name "*.py" | xargs pylint || true
       - name: Hello world action step
         id: hello
         uses: actions/hello-world-docker-action@v1
