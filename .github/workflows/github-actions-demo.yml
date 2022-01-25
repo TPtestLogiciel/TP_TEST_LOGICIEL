@@ -14,12 +14,12 @@ jobs:
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
-      - name: Which pylint
-        run: |
-          pip3 install pylint
+      #- name: Which pylint
+      #  run: |
+      #    pip3 install pylint
       - name: Verify all Python files using Pylint
         run: |
-          find . -type f -name "*.py" | xargs pylint || true
+          find . -type f -name "*.py" | xargs /home/maxime/.local/bin/pylint || true
       - name: Hello world action step
         id: hello
         uses: actions/hello-world-docker-action@v1
