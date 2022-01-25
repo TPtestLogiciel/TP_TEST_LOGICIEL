@@ -47,11 +47,15 @@ class TestBddSrv(unittest.TestCase):
 		)
         self.assertFalse(bdd.CheckKey(""))
 
-    def CreateRandomIP(self):
-        ip = ".".join(map(str, (random.randint(0, 255) 
+    def CreateRandomIP():
+        ip_temp = ".".join(map(str, (random.randint(0, 255) 
                         for _ in range(4))))
-        print(ip)
-        return ip
+        ip=ip_temp + ":"
+
+        ip_final= ip + str(random.randint(0, 10000))
+
+        print(ip_final)
+        return ip_final
     
     def test_Ajout(self):
         key = self.CreateRandomString(64) # nobody said anything about using 4 times the same key (yet)
