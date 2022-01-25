@@ -96,20 +96,20 @@ class test_bdd_srv(unittest.TestCase):
         self.assertFalse(bdd.check_user_login("aaab", "aAaa#a9aa"))  # Bad Username
 
     def test_check_ip(self):
-        self.assertTrue(bdd.check_ip(self.create_random_ip()))  # IP fonctionnelle
-        self.assertFalse(bdd.check_ip(""))  # Liste vide
-        self.assertFalse(bdd.check_ip("1.4.126.79.78"))  # Taille trop grande
-        self.assertFalse(bdd.check_ip("1.2"))  # Taille trop petite
-        self.assertFalse(bdd.check_ip("-128.-10.54.6"))  # une valeur negative
-        self.assertFalse(bdd.check_ip("500.200.128.3"))  # une valeur < 255
-        self.assertFalse(bdd.check_ip("30.100.128.a"))  # lettre ascii
-        self.assertFalse(bdd.check_ip("30.100.128.#"))  # caractere special
-        self.assertFalse(bdd.check_ip("30.100.128.A"))  # majuscule ascii
+        self.assertTrue(bdd.check_ip(self.create_random_ip()))  # good Ip
+        self.assertFalse(bdd.check_ip(""))  # empty list
+        self.assertFalse(bdd.check_ip("1.4.126.79.78"))  # greater size
+        self.assertFalse(bdd.check_ip("1.2"))  # lesser size
+        self.assertFalse(bdd.check_ip("-128.-10.54.6"))  # negative value
+        self.assertFalse(bdd.check_ip("500.200.128.3"))  # value < 255
+        self.assertFalse(bdd.check_ip("30.100.128.a"))  # ascii letter
+        self.assertFalse(bdd.check_ip("30.100.128.#"))  # special
+        self.assertFalse(bdd.check_ip("30.100.128.A"))  # upper
 
-        self.assertFalse(bdd.check_ip("30.100.128.12:"))  # Ip fonctionelle port vide
-        self.assertFalse(bdd.check_ip("30.100.128.12:-60"))  # port negatif
-        self.assertFalse(bdd.check_ip("30.100.128.12:afdeh"))  # port non numeric
-        self.assertFalse(bdd.check_ip("30.100.128.12:108:200:300"))  # plusieur ports
+        self.assertFalse(bdd.check_ip("30.100.128.12:"))  # empty port
+        self.assertFalse(bdd.check_ip("30.100.128.12:-60"))  # negative port
+        self.assertFalse(bdd.check_ip("30.100.128.12:afdeh"))  # non numerical port
+        self.assertFalse(bdd.check_ip("30.100.128.12:108:200:300"))  # many ports ':'
 
 
 if __name__ == "__main__":
