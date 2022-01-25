@@ -27,7 +27,7 @@ def CheckPassword(password):
     return True
 
 def CheckKey(key):
-    if len(key) != 128:
+    if len(key) != 64:
         return False
     return True
 

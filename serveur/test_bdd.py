@@ -37,12 +37,12 @@ class TestBddSrv(unittest.TestCase):
     def test_CheckKey(self):
         self.assertTrue(
 			bdd.CheckKey(
-				self.CreateRandomString(128)
+				self.CreateRandomString(64)
 			) # terrible code to generate a random string
 		)
         self.assertFalse(
 			bdd.CheckKey(
-				self.CreateRandomString(127)
+				self.CreateRandomString(63)
 			) # terrible code to generate a random string
 		)
         self.assertFalse(bdd.CheckKey(""))
@@ -54,16 +54,16 @@ class TestBddSrv(unittest.TestCase):
         return ip
     
     def test_Ajout(self):
-        key = self.CreateRandomString(128) # nobody said anything about using 4 times the same key (yet)
+        key = self.CreateRandomString(64) # nobody said anything about using 4 times the same key (yet)
         self.assertFalse(bdd.bdd_ajout("aaa","aAaa#a9aa",self.CreateRandomIP(),key)) # bad username
         self.assertFalse(bdd.bdd_ajout("aaaa","",self.CreateRandomIP(),key)) # bad password
-        self.assertFalse(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),self.CreateRandomString(127))) # bad key
+        self.assertFalse(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),self.CreateRandomString(63))) # bad key
         self.assertTrue(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key))
         self.assertFalse(bdd.bdd_ajout("aaaa","aAaa#a9aa",self.CreateRandomIP(),key)) # Not supposed to be able to add 2* same user
         
     def test_UserLogin(self):
 		# Let's add a correct user :
-        key = self.CreateRandomString(128)
+        key = self.CreateRandomString(64)
         self.assertTrue(bdd.bdd_ajout("cccc","aAaa#a9aa",self.CreateRandomIP(),key))
         self.assertTrue(bdd.CheckUserLogin("cccc","aAaa#a9aa"))
         self.assertFalse(bdd.CheckUserLogin("cccc","aAaa#a9a")) # Bad Password
