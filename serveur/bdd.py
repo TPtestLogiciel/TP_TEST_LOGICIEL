@@ -33,7 +33,6 @@ def CheckKey(key):
 
 def CheckUserLogin(username, password):
 	cur = conn.cursor()
-
 	cur.execute("SELECT password FROM BDD WHERE username=:username",{"username":username})
 	ret = cur.fetchall()
 	if len(ret) != 1 or password != ret[0][0] :
@@ -42,23 +41,50 @@ def CheckUserLogin(username, password):
 
 def CheckIP(ip):
     
-    List_elem=ip.split('.')
-    is_in_limit=True
-    number_only=True
-    is_size_limit=True
+    List_elem_port=ip.split(':')
+    List_elem_ip=List_elem_port[0].split('.')
+    
+    is_in_limit_ip=True
+    number_only_ip=True
+    is_size_limit_ip=True
 
-    if len(List_elem) != 4:
-        is_size_limit = False
-        return is_size_limit
+    # Test IP
+    if len(List_elem_ip) != 4:
+        is_size_limit_ip = False
+        return is_size_limit_ip
 
-    for elem in List_elem:
+    for elem in List_elem_ip:
         if elem.isdecimal()==False:
-            number_only = False
-            return number_only
+            number_only_ip = False
+            return number_only_ip
         
         if (int(elem) < 0 or int(elem) > 255):
-            is_in_limit=False
-            return is_in_limit
+            is_in_limit_ip=False
+            return is_in_limit_ip
+    
+    is_empty_port=True
+    number_only_port=True
+    is_size_limit_port=True
+    is_positif_port=True
+    
+    # Test Port
+    if len(List_elem_port) != 2:
+        is_size_limit_port = False
+        return is_size_limit_port
+
+    if len(List_elem_port[1]) < 1:
+        is_empty_port=False
+        return is_empty_port
+
+    for elem_port in List_elem_port[1]:
+        if List_elem_port[1].isnumeric() == False:
+            number_only_port=False
+            return number_only_port
+    
+    if int(List_elem_port[1])<0:
+        is_positif_port=False
+        return is_positif_port
+
     return True
 
 def bdd_creation():

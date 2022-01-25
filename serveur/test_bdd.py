@@ -53,8 +53,6 @@ class TestBddSrv(unittest.TestCase):
         ip=ip_temp + ":"
 
         ip_final= ip + str(random.randint(0, 10000))
-
-        print(ip_final)
         return ip_final
     
     def test_Ajout(self):
