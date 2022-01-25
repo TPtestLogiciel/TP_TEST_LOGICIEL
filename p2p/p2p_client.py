@@ -1,11 +1,12 @@
 """p2p_client
 
 Usage:
-    p2p_client.py --buddy=<buddy>
+    p2p_client.py --buddy=<buddy> --port=<int>
 
 Options:
     -h --help  Show this screen for help
     --buddy=<buddy>  buddy username
+    --port=<int>  source port
 """
 
 import http.client
@@ -86,18 +87,21 @@ if __name__ == "__main__":
     user = ARGS["--buddy"]
     (msg_received, status, reason) = get_ip_port(server_ip, server_port, user)
     print(msg_received, status, reason)
+    msg_json = json.loads(msg_received)
+    print("port: ", msg_json["port"])
 
     # source_port = 8001
-    # target_port = msg_received["port"]
-    # ip_address = msg_received["ip_address"]
-    # try:
-    #     thread1 = threading.Thread(
-    #         target=compose_message, args=(ip_address, target_port, user)
-    #     )
-    #     thread2 = threading.Thread(target=server, args=(ip_address, source_port, user))
-    #     thread1.start()
-    #     thread2.start()
-    #     thread1.join()
-    #     thread2.join()
-    # except KeyboardInterrupt:
-    #     print("Press Ctrl+C to remove server part")
+    source_port = ARGS["--port"]
+    target_port = msg_json["port"]
+    ip_address = msg_json["ip_address"]
+    try:
+        thread1 = threading.Thread(
+            target=compose_message, args=(ip_address, target_port, user)
+        )
+        thread2 = threading.Thread(target=server, args=(ip_address, source_port, user))
+        thread1.start()
+        thread2.start()
+        thread1.join()
+        thread2.join()
+    except KeyboardInterrupt:
+        print("Press Ctrl+C to remove server part")
