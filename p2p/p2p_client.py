@@ -41,12 +41,12 @@ def send_message(message, target_ip, target_port, username):
     # print("-- post function called --")
     try:
         conn = http.client.HTTPConnection(target_ip, target_port)
-        headers = {'Content-Type': 'application/json'}
-        dataToServer = {'username': username, 'text': message}
+        headers = {"Content-Type": "application/json"}
+        dataToServer = {"username": username, "text": message}
         jsonData = json.dumps(dataToServer)
         print(jsonData)
-        
-        conn.request('POST', '/p2p_post', jsonData, headers)
+
+        conn.request("POST", "/p2p_post", jsonData, headers)
         response = conn.getresponse()
         msgReceived = response.read().decode()
         serverStatus = response.status
@@ -56,56 +56,54 @@ def send_message(message, target_ip, target_port, username):
         print("Failed to connect to server. Try again later.")
         return -1, -1, -1
 
+
 def compose_message(target_ip, target_port, user):
     """
     Arguments : adresse IP du destinataire, le port du destinataire,
     username du destinataire
-    Demande a l'utilisateur un message en input pour envoyer au 
+    Demande a l'utilisateur un message en input pour envoyer au
     destinataire.
     """
-    while(True):
-        text_input = input('>> ')
-        (data_send, 
-        server_status,
-        server_reason) = send_message(text_input, 
-                                      target_ip,
-                                      target_port,
-                                      user)
+    while True:
+        text_input = input(">> ")
+        (data_send, server_status, server_reason) = send_message(
+            text_input, target_ip, target_port, user
+        )
 
 
 def server(ipaddress, local_port, user):
     """
-    Creer un serveur avec une adresse ip et un port passes en 
+    Creer un serveur avec une adresse ip et un port passes en
     arguments
     """
     app.run(host=ipaddress, port=local_port)
 
 
-@app.route('/p2p_post', methods=['POST']) 
+@app.route("/p2p_post", methods=["POST"])
 def p2p_post():
     """
     Recoit le message d'un client et l'affiche dans la console
     """
     data = request.get_json()
-    text = data.get('text', '')
-    ip = data.get('ip', '')
+    text = data.get("text", "")
+    ip = data.get("ip", "")
     print("<< {} : {}".format(user, text))
     return data
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ARGS = docopt(__doc__)
 
-    user = ARGS['--buddy']
-    target_ip = ARGS['--ip']
-    target_port = ARGS['--port_dest']
-    ip = ARGS['--ip']
-    source_port = ARGS['--port_source']
+    user = ARGS["--buddy"]
+    target_ip = ARGS["--ip"]
+    target_port = ARGS["--port_dest"]
+    ip = ARGS["--ip"]
+    source_port = ARGS["--port_source"]
     try:
-        thread1 = threading.Thread(target=compose_message, 
-                                    args=(target_ip, target_port, user))
-        thread2 = threading.Thread(target=server, 
-                                    args=(ip, source_port, user))
+        thread1 = threading.Thread(
+            target=compose_message, args=(target_ip, target_port, user)
+        )
+        thread2 = threading.Thread(target=server, args=(ip, source_port, user))
         thread1.start()
         thread2.start()
         thread1.join()
