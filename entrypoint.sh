@@ -16,6 +16,6 @@ echo "Hello $1"
 time=$(date)
 echo "::set-output name=time::$time"
 
-workflow_log=$(pwd)
+workflow_log=$(date)
 echo "::set-output name=workflow_log::$workflow_log"
 
