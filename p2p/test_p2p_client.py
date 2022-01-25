@@ -156,13 +156,13 @@ class TestP2PClient(unittest.TestCase):
         #Test du fichier envoyé
         get_printed_output = io.StringIO()
         sys.stdout = get_printed_output
-        self.assertEqual(p2p_client.send_public_key("fichier_inexistant","0.0.0.0","8000","8080"),-1)
+        self.assertEqual(p2p_client.send_public_key("fichier_inexistant","0.0.0.0","8000","8080"),(-1,-1,-1))
         sys.stdout = sys.__stdout__
         self.assertEqual("Erreur : Le fichier n'existe pas\n",get_printed_output.getvalue())
 
         get_printed_output = io.StringIO()
         sys.stdout = get_printed_output
-        self.assertEqual(p2p_client.send_public_key("p2p_client.py","0.0.0.0","8000","8080"),-1)
+        self.assertEqual(p2p_client.send_public_key("p2p_client.py","0.0.0.0","8000","8080"),(-1,-1,-1))
         sys.stdout = sys.__stdout__
         self.assertEqual("Erreur : Le fichier n'est pas une clé publique\n",get_printed_output.getvalue())
 
