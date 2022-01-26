@@ -5,7 +5,7 @@ Usage:
 
 Options:
     -h --help  Show this screen for help
-    --buddy=<buddy>  buddy username
+    --buddy=<buddy>  the user we want to talk to
     --port=<int>  source port
 """
 
@@ -14,7 +14,7 @@ import json
 import threading
 
 from docopt import docopt
-from flask import Flask, request
+from flask import Flask, request, Response
 
 app = Flask(__name__)
 
@@ -29,7 +29,6 @@ def send_message(message, target_ip, target_port, username):
         http_headers = {"Content-Type": "application/json"}
         data_to_server = {"username": username, "text": message}
         json_data = json.dumps(data_to_server)
-        print(json_data)
 
         conn.request("POST", "/p2p_post", json_data, http_headers)
         server_response = conn.getresponse()
@@ -39,7 +38,7 @@ def send_message(message, target_ip, target_port, username):
         return msg_received, server_status, server_reason
     except ConnectionRefusedError:
         print("Failed to connect to {}. Try again later.".format(username))
-        return -1, -1, -1
+        return -1, Response(status=503), -1
 
 
 def compose_message(target_ip, target_port, user):
@@ -50,21 +49,29 @@ def compose_message(target_ip, target_port, user):
         text_input = input(">> ")
         send_message(text_input, target_ip, target_port, user)
 
-def get_ip_port(server_ip, server_port, user):
-    conn_server = http.client.HTTPConnection(server_ip, server_port)
-    conn_server.request("GET", "/get_ip_port/{}".format(user))
 
-    server_response = conn_server.getresponse()
-    msg_received = server_response.read().decode()
-    server_status = server_response.status
-    server_reason = server_response.reason
-    return msg_received, server_status, server_reason
+def get_ip_port(server_ip, server_port, user):
+    try:
+        conn_server = http.client.HTTPConnection(server_ip, server_port)
+        conn_server.request("GET", "/isalive")
+        if conn_server.getresponse().status == 200:
+            conn_server.request("GET", "/get_ip_port/{}".format(user))
+
+            server_response = conn_server.getresponse()
+            msg_received = server_response.read().decode()
+            server_status = server_response.status
+            server_reason = server_response.reason
+            return msg_received, server_status, server_reason
+    except ConnectionRefusedError:
+        print("Failed to connect to server. Try again later")
+        return -1, Response(status=503), -1
 
 
 def server(ip_address, local_port, user):
     """
     Create server with ip address and port.
     """
+    print("Lauch server :", local_port)
     app.run(host=ip_address, port=local_port)
 
 
@@ -86,22 +93,22 @@ if __name__ == "__main__":
     server_port = 8000
     user = ARGS["--buddy"]
     (msg_received, status, reason) = get_ip_port(server_ip, server_port, user)
-    print(msg_received, status, reason)
-    msg_json = json.loads(msg_received)
-    print("port: ", msg_json["port"])
+    if status == 200:
+        msg_json = json.loads(msg_received)
 
-    # source_port = 8001
-    source_port = ARGS["--port"]
-    target_port = msg_json["port"]
-    ip_address = msg_json["ip_address"]
-    try:
-        thread1 = threading.Thread(
-            target=compose_message, args=(ip_address, target_port, user)
-        )
-        thread2 = threading.Thread(target=server, args=(ip_address, source_port, user))
-        thread1.start()
-        thread2.start()
-        thread1.join()
-        thread2.join()
-    except KeyboardInterrupt:
-        print("Press Ctrl+C to remove server part")
+        source_port = ARGS["--port"]
+        target_port = msg_json["port"]
+        ip_address = msg_json["ip_address"]
+        try:
+            thread1 = threading.Thread(
+                target=compose_message, args=(ip_address, target_port, user)
+            )
+            thread2 = threading.Thread(target=server, args=(ip_address, source_port, user))
+            thread1.start()
+            thread2.start()
+            thread1.join()
+            thread2.join()
+        except KeyboardInterrupt:
+            print("Press Ctrl+C to remove server part")
+    else:
+        print("Server status : {}".format(status))
