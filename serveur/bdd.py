@@ -160,6 +160,18 @@ def bdd_show(db_path):
         print(row)
         print("\n")
 
+def bdd_get_ip(db_path,username):
+    conn,cur=connect_db(db_path)
+
+    cur.execute("SELECT ip FROM BDD WHERE username=:username",{"username":username})
+    ret = cur.fetchall()
+
+    if len(ret) != 1:
+        return False
+    print("ret=")
+    print(ret[0][0])
+
+    return ret[0][0]
 
 def bdd_close(db_path):
     conn, cur = connect_db(db_path)
