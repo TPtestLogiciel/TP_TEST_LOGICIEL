@@ -29,7 +29,7 @@ jobs:
       # Use the output from the `hello` step
       #- name: Get the output time
       #  run: echo "The time was ${{ steps.hello.outputs.time }}"
-      - name: Get myvar1
-        run: echo "Myvar1 was ${{ steps.hello.outputs.myvar1 }}"
-      - name: Get myvar2
-        run: echo "Myvar2 was ${{ steps.hello.outputs.myvar2 }}"
+      #- name: Get myvar1
+      #  run: echo "Myvar1 was ${{ steps.hello.outputs.myvar1 }}"
+      #- name: Get myvar2
+      #  run: echo "Myvar2 was ${{ steps.hello.outputs.myvar2 }}"
