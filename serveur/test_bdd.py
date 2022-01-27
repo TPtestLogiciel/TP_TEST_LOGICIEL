@@ -1,4 +1,6 @@
+import os
 import random
+import sqlite3
 import string
 import unittest
 
@@ -6,14 +8,36 @@ import bdd
 
 
 class test_bdd_srv(unittest.TestCase):
+
+    test_db = "test_db.db"
+
+    def setUp(self):
+        if os.path.isfile(self.test_db):
+            os.remove(self.test_db)
+        bdd.bdd_creation(self.test_db)
+
+    def tearDown(self):
+        if os.path.isfile(self.test_db):
+            os.remove(self.test_db)
+
     def test_bdd_creation(self):
-        bdd.bdd_creation()
-        cursor = bdd.conn.execute("select * from BDD")
+
+        if os.path.isfile(self.test_db):
+            os.remove(self.test_db)
+        self.assertTrue(bdd.bdd_creation(self.test_db))
+        # Let's check that the created db has all necessary tables and fields
+        con = sqlite3.connect(self.test_db)
+        cursor = con.execute("select * from BDD")
+
         names = list(map(lambda x: x[0], cursor.description))
         self.assertIn("username", names)
         self.assertIn("password", names)
         self.assertIn("ip", names)
         self.assertIn("clef_pub", names)
+
+        self.assertFalse(
+            bdd.bdd_creation(self.test_db)
+        )  # verifying we cannot recreate the db
 
     def test_username(self):
         self.assertFalse(bdd.check_username(""))  # empty
@@ -69,31 +93,40 @@ class test_bdd_srv(unittest.TestCase):
             64
         )  # nobody said anything about using 4 times the same key (yet)
         self.assertFalse(
-            bdd.bdd_add("aaa", "aAaa#a9aa", self.create_random_ip(), key)
+            bdd.bdd_add(self.test_db, "aaa", "aAaa#a9aa", self.create_random_ip(), key)
         )  # bad username
         self.assertFalse(
-            bdd.bdd_add("aaaa", "", self.create_random_ip(), key)
+            bdd.bdd_add(self.test_db, "aaaa", "", self.create_random_ip(), key)
         )  # bad password
         self.assertFalse(
             bdd.bdd_add(
+                self.test_db,
                 "aaaa",
                 "aAaa#a9aa",
                 self.create_random_ip(),
                 self.create_random_string(63),
             )
         )  # bad key
-        self.assertTrue(bdd.bdd_add("aaaa", "aAaa#a9aa", self.create_random_ip(), key))
+        self.assertTrue(
+            bdd.bdd_add(self.test_db, "aaaa", "aAaa#a9aa", self.create_random_ip(), key)
+        )
         self.assertFalse(
-            bdd.bdd_add("aaaa", "aAaa#a9aa", self.create_random_ip(), key)
+            bdd.bdd_add(self.test_db, "aaaa", "aAaa#a9aa", self.create_random_ip(), key)
         )  # Not supposed to be able to add 2* same user
 
     def test_user_login(self):
         # Let's add a correct user :
         key = self.create_random_string(64)
-        self.assertTrue(bdd.bdd_add("cccc", "aAaa#a9aa", self.create_random_ip(), key))
-        self.assertTrue(bdd.check_user_login("cccc", "aAaa#a9aa"))
-        self.assertFalse(bdd.check_user_login("cccc", "aAaa#a9a"))  # Bad Password
-        self.assertFalse(bdd.check_user_login("aaab", "aAaa#a9aa"))  # Bad Username
+        self.assertTrue(
+            bdd.bdd_add(self.test_db, "cccc", "aAaa#a9aa", self.create_random_ip(), key)
+        )
+        self.assertTrue(bdd.check_user_login(self.test_db, "cccc", "aAaa#a9aa"))
+        self.assertFalse(
+            bdd.check_user_login(self.test_db, "cccc", "aAaa#a9a")
+        )  # Bad Password
+        self.assertFalse(
+            bdd.check_user_login(self.test_db, "aaab", "aAaa#a9aa")
+        )  # Bad Username
 
     def test_check_ip(self):
         self.assertTrue(bdd.check_ip(self.create_random_ip()))  # good Ip
