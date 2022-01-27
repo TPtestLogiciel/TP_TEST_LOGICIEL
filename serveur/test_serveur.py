@@ -47,8 +47,16 @@ class TestUserSrv(unittest.TestCase):
 
     def test_register(self):
         key1 = self.CreateRandomString(64)
-        response=requests.post(self.SrvUrl+"/register",json={"name":"Mohamed","pwd":"aAaa#a9aa","ip":"192.0.0.2","key":key1})
+        response=requests.post(self.SrvUrl+"/register",json={"name":"Mohamed","pwd":"aAaa#a9aa","ip":"192.0.0.2:5501","key":key1})
         self.assertEqual(response.status_code,200)
+        
+        #payload too small
+        response=requests.post(self.SrvUrl+"/register",json={"pwd":"aAaa#a9aa","ip":"0.0.0.4","key":key1})
+        self.assertEqual(response.status_code,454)
+
+        #payload too big
+        response=requests.post(self.SrvUrl+"/register",json={"name":"Ekdc","username":"Rtyu","pwd":"aAaa#a9aa","ip":"0.0.0.4","key":key1})
+        self.assertEqual(response.status_code,454)
 
         #field name empty
         response=requests.post(self.SrvUrl+"/register",json={"name":"","pwd":"aAaa#a9aa","ip":"0.0.0.4","key":key1})
@@ -58,11 +66,11 @@ class TestUserSrv(unittest.TestCase):
         self.assertEqual(response.status_code,456)
 
         #field pwd empty
-        response=requests.post(self.SrvUrl+"/register",json={"name":"Dkd5","pwd":"","ip":"192.0.0.8","key":key1})
+        response=requests.post(self.SrvUrl+"/register",json={"name":"Dkd5","pwd":"","ip":"192.0.0.8:5820","key":key1})
         self.assertEqual(response.status_code,457)
 
         #field key empty
-        response=requests.post(self.SrvUrl+"/register",json={"name":"Mokdfz","pwd":"aAaa#a9aa","ip":"192.0.0.5","key":""})
+        response=requests.post(self.SrvUrl+"/register",json={"name":"Mokdfz","pwd":"aAaa#a9aa","ip":"192.0.0.5:4412","key":""})
         self.assertEqual(response.status_code,458)
 
 if __name__ == '__main__':

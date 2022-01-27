@@ -41,7 +41,15 @@ def register():
 
     error = None
 
+
+    if len(payload) != 4:
+        error = "field(s) missing."
+        print("|!| Error 454 :", error)
+        return Response(status=454)
+ 
     code=bdd.bdd_add(payload['name'],payload['pwd'],payload['ip'],payload['key'])
+    
+
     if code==455:
         error = 'name is empty or incorrect.'
         print("|!| Error ",code,":",error)
@@ -67,9 +75,11 @@ def register():
 
     return payload
 
+
 if __name__ == '__main__':
     ARGS = docopt(__doc__)
     if ARGS['--port']:
         APP.run(host='0.0.0.0', port=ARGS['--port'])
     else:
         logging.error("Wrong command line arguments")
+
