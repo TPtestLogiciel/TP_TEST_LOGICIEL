@@ -47,11 +47,11 @@ def register():
         print("|!| Error 454 :", error)
         return Response(status=454)
  
-    code=bdd.bdd_add(payload['name'],payload['pwd'],payload['ip'],payload['key'])
+    code=bdd.bdd_add(payload['username'],payload['pwd'],payload['ip'],payload['key'])
     
 
     if code==455:
-        error = 'name is empty or incorrect.'
+        error = 'username is empty or incorrect.'
         print("|!| Error ",code,":",error)
         return Response(status=code)
 
@@ -75,10 +75,17 @@ def register():
 
     return payload
 
+@APP.route("/get_ip_port/<username>", methods=["GET"])
+def get_ip_port(username):
+    """
+    Receive and display client's message.
+    """
+    return -1
 
 if __name__ == '__main__':
     ARGS = docopt(__doc__)
     if ARGS['--port']:
+        # bdd.bdd_creation()
         APP.run(host='0.0.0.0', port=ARGS['--port'])
     else:
         logging.error("Wrong command line arguments")
