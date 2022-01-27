@@ -74,6 +74,10 @@ def register():
         print("|!| Error ", code, ":", error)
         return Response(status=code)
 
+    elif code == 460:
+        error = "Invalid signature"
+        print("|!| Error ", code, ":", error)
+        return Response(status=code)
     return payload
 
 
