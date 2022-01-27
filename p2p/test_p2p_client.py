@@ -38,11 +38,10 @@ class TestP2PClient(unittest.TestCase):
     msgFromAir = "Hi Ground, it's a message from Air!"
     msgJsonAir = {"username": buddyUsr1, "text": msgFromAir}
 
-    certificate_from_air = "/home/steven/cert.pem"  # path du certificat.pem
-    private_key = "/home/steven/private.pem"
+    certificate_from_air = "cert.pem"  # path du certificat.pem
+    private_key = "private.pem"
     password = "azertyuiop"
-    certificate2 = "/home/steven/cert2.pem"
-
+    certificate2 = "cert2.pem"
 
     def setUp(self):
         # Launch User1 Ground terminal
@@ -189,9 +188,7 @@ class TestP2PClient(unittest.TestCase):
         # Test Vérification d'un message non signé et d'une signature random
         get_printed_output = io.StringIO()
         sys.stdout = get_printed_output
-        p2p_client.verify_sign(
-            "Message non signée", sign, self.certificate_from_air
-        )
+        p2p_client.verify_sign("Message non signée", sign, self.certificate_from_air)
         sys.stdout = sys.__stdout__
         self.assertEqual("Message is not signed\n", get_printed_output.getvalue())
 
@@ -216,13 +213,16 @@ class TestP2PClient(unittest.TestCase):
         sys.stdout = sys.__stdout__
         self.assertEqual("Message is not signed\n", get_printed_output.getvalue())
 
-
-      
     def test_sign_and_send_message(self):
         # Test response and connection to server Ground with client
         # Air with a string msg and sign
         (dataSend, serverStatus, serverReason) = p2p_client.sign_and_send_message(
-            self.msgFromAir,self.private_key,self.password, self.ip, self.portUser2, self.buddyUsr1
+            self.msgFromAir,
+            self.private_key,
+            self.password,
+            self.ip,
+            self.portUser2,
+            self.buddyUsr1,
         )
         dataSend = json.loads(dataSend)
 
@@ -230,12 +230,15 @@ class TestP2PClient(unittest.TestCase):
         sys.stdout = get_printed_output
         text = dataSend["text"]
         signature = dataSend["signature"]
-        p2p_client.verify_sign(dataSend["text"],dataSend["signature"], self.certificate_from_air)
+        p2p_client.verify_sign(
+            dataSend["text"], dataSend["signature"], self.certificate_from_air
+        )
         sys.stdout = sys.__stdout__
         self.assertEqual("Message is signed\n", get_printed_output.getvalue())
-        
+
         self.assertEqual(serverStatus, 200)
         self.assertEqual(serverReason, "OK")
-    
+
+
 if __name__ == "__main__":
     unittest.main()

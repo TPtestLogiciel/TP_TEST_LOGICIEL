@@ -104,7 +104,7 @@ def sign_message(message, private_key, password):
     signature = crypto.sign(pkey, bytes_message, "sha256")
     signature_b64 = base64.b64encode(signature)
     signature_b64_string = signature_b64.decode()
-    message=bytes_message.decode()
+    message = bytes_message.decode()
     return message, signature_b64_string
 
 
@@ -147,9 +147,12 @@ def verify_sign(message, signature_b64_string, certificate):
         print("Message is not signed")
     return 0, 0
 
-def sign_and_send_message(message,private_key,password, target_ip, target_port, username):
+
+def sign_and_send_message(
+    message, private_key, password, target_ip, target_port, username
+):
     """
-    Arguments : message a envoyer, 
+    Arguments : message a envoyer,
                 la clé privé pour signer le message
                 le password de la clé privé
                 l'adresse IP du destinataire,
@@ -166,9 +169,13 @@ def sign_and_send_message(message,private_key,password, target_ip, target_port, 
     try:
         conn = http.client.HTTPConnection(target_ip, target_port)
         headers = {"Content-Type": "application/json"}
-        message_signe,signature = sign_message(message,private_key,password)
+        message_signe, signature = sign_message(message, private_key, password)
 
-        dataToServer = {"username": username, "text": message_signe, "signature": signature}
+        dataToServer = {
+            "username": username,
+            "text": message_signe,
+            "signature": signature,
+        }
         jsonData = json.dumps(dataToServer)
         print(jsonData)
         conn.request("POST", "/p2p_post_and_sign", jsonData, headers)
@@ -257,6 +264,7 @@ def p2p_post_key():
     print("<< {} : {}".format(user, clef_publique))
     return data
 
+
 @app.route("/p2p_post_and_sign", methods=["POST"])
 def p2p_post_and_sign():
     """
@@ -264,9 +272,10 @@ def p2p_post_and_sign():
     """
     data = request.get_json()
     text = data.get("text", "")
-    signature = data.get("signature","")
+    signature = data.get("signature", "")
     print("<< {} : {}".format(user, text, signature))
     return data
+
 
 if __name__ == "__main__":
     ARGS = docopt(__doc__)
