@@ -204,7 +204,6 @@ class test_bdd_srv(unittest.TestCase):
         )
         self.assertEqual(bdd.bdd_get_ip(self.test_db, "aabbaa"), ip)
 
-
     def test_get_ip(self):
         # Let's add a correct user :
         key = self.create_random_string(64)
@@ -215,6 +214,7 @@ class test_bdd_srv(unittest.TestCase):
         self.assertEqual(
             edern_bdd.bdd_get_ip_port("aaab"), (False, False)
         )  # bad username
+
 
 if __name__ == "__main__":
     unittest.main()
