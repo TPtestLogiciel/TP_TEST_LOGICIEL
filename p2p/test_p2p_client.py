@@ -48,8 +48,8 @@ class TestP2PClient(unittest.TestCase):
 
         # Launch client p2p subprocess, Alice user
         print("LAUNCH ALICE SUBPROCESS\n")
-        cmd_client = "python3 p2p_client.py --buddy={} --port={}".format(
-            self.username_2, self.port_user_1
+        cmd_client = "python3 p2p_client.py --buddy={} --port_source={} --port_server={}".format(
+            self.username_2, self.port_user_1, self.server_port
         )
         args_client = shlex.split(cmd_client)
         # launch command as a subprocess
