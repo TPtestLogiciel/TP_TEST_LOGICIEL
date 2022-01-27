@@ -1,14 +1,13 @@
 """p2p_client
 
 Usage:
-    p2p_client.py --buddy=<buddy> [--ip=<ip>] [--port_dest=<int>] [--port_source=<int>]
+    p2p_client.py --buddy=<buddy> --port_source=<int> --port_server=<int>
 
 Options:
     -h --help  Show this screen for help
-    --buddy=<buddy>  buddy username
-    --ip=<ip>  ip used [default: 0.0.0.0]
-    --port_dest=<int>  port destinataire [default: 8080]
-    --port_source=<int>  port source [default: 8000]
+    --buddy=<buddy>  the user we want to talk to
+    --port_source=<int>  source port
+    --port_server=<int>  source server
 """
 
 import base64
@@ -25,8 +24,64 @@ from docopt import docopt
 from flask import Flask, Response, request
 from OpenSSL import crypto
 
+import bdd
+
 app = Flask(__name__)
-# app.debug = True
+
+
+def input_register(server_ip, server_port, ip, source_port):
+    name_user = input("Please enter your username : ")
+    pwd = input("Please enter your password : ")
+    (msg_received, status, reason) = register(
+        server_ip, server_port, ip, source_port, name_user, pwd
+    )
+    return msg_received, status, reason
+
+
+def register(server_ip, server_port, ip, source_port, name_user, pwd):
+    try:
+        conn = http.client.HTTPConnection(server_ip, server_port)
+        http_headers = {"Content-Type": "application/json"}
+        ip = ip + ":" + str(source_port)
+        key = bdd.create_random_string(64)
+        data_to_server = {"username": name_user, "pwd": pwd, "ip": ip, "key": key}
+        json_data = json.dumps(data_to_server)
+
+        conn.request("POST", "/register", json_data, http_headers)
+        server_response = conn.getresponse()
+        msg_received = server_response.read().decode()
+        server_status = server_response.status
+        server_reason = server_response.reason
+        return msg_received, server_status, server_reason
+    except ConnectionRefusedError:
+        print("Failed to connect to {}. Try again later.".format(username))
+        return -1, Response(status=503), -1
+
+
+def get_ip_port(server_ip, server_port, user):
+    try:
+        conn_server = http.client.HTTPConnection(server_ip, server_port)
+        conn_server.request("GET", "/isalive")
+        if conn_server.getresponse().status == 200:
+            conn_server.request("GET", "/get_ip_port/{}".format(user))
+
+            server_response = conn_server.getresponse()
+            msg_received = server_response.read().decode()
+            server_status = server_response.status
+            server_reason = server_response.reason
+            return msg_received, server_status, server_reason
+    except ConnectionRefusedError:
+        print("Failed to connect to server. Try again later")
+        return -1, Response(status=503), -1
+
+
+def compose_message(target_ip, target_port, user):
+    """
+    Ask to enter a message as an input to be sent to user.
+    """
+    while True:
+        text_input = input(">> ")
+        send_message(text_input, target_ip, target_port, user)
 
 
 def send_certificate(certificate, target_ip, target_port, username):
@@ -168,7 +223,7 @@ def sign_and_send_message(
     # print("-- post function called --")
     try:
         conn = http.client.HTTPConnection(target_ip, target_port)
-        headers = {"Content-Type": "application/json"}
+        http_headers = {"Content-Type": "application/json"}
         message_signe, signature = sign_message(message, private_key, password)
 
         dataToServer = {
@@ -176,14 +231,13 @@ def sign_and_send_message(
             "text": message_signe,
             "signature": signature,
         }
-        jsonData = json.dumps(dataToServer)
-        print(jsonData)
-        conn.request("POST", "/p2p_post_and_sign", jsonData, headers)
-        response = conn.getresponse()
-        msgReceived = response.read().decode()
-        serverStatus = response.status
-        serverReason = response.reason
-        return msgReceived, serverStatus, serverReason
+        json_data = json.dumps(data_to_server)
+        conn.request("POST", "/p2p_post_and_sign", json_data, http_headers)
+        server_response = conn.getresponse()
+        msg_received = server_response.read().decode()
+        server_status = server_response.status
+        server_reason = server_response.reason
+        return msg_received, server_status, server_reason
     except ConnectionRefusedError:
         print("Failed to connect to server. Try again later.")
         return -1, -1, -1
@@ -191,33 +245,24 @@ def sign_and_send_message(
 
 def send_message(message, target_ip, target_port, username):
     """
-    Arguments : message a envoyer, l'adresse IP du destinataire,
-    le port du destinataire et son username.
-    - Creation d'une connexion HTTP avec l'IP et le port destinataire
-    - Envoi d'un JSON avec l'username du destinataire et le coeur
-    du message
-    - Requete POST a la partie serveur du destinataire
-    - Recupere les reponses de la partie serveur du destinataire
-    Retourne le message recu par le serveur, le status du serveur et
-    la raison associee.
+    Send message to server of username. Return received message by username's
+    server, server status and its reason.
     """
-    # print("-- post function called --")
     try:
         conn = http.client.HTTPConnection(target_ip, target_port)
-        headers = {"Content-Type": "application/json"}
-        dataToServer = {"username": username, "text": message}
-        jsonData = json.dumps(dataToServer)
-        print(jsonData)
+        http_headers = {"Content-Type": "application/json"}
+        data_to_server = {"username": username, "text": message}
+        json_data = json.dumps(data_to_server)
 
-        conn.request("POST", "/p2p_post", jsonData, headers)
-        response = conn.getresponse()
-        msgReceived = response.read().decode()
-        serverStatus = response.status
-        serverReason = response.reason
-        return msgReceived, serverStatus, serverReason
+        conn.request("POST", "/p2p_post", json_data, http_headers)
+        server_response = conn.getresponse()
+        msg_received = server_response.read().decode()
+        server_status = server_response.status
+        server_reason = server_response.reason
+        return msg_received, server_status, server_reason
     except ConnectionRefusedError:
-        print("Failed to connect to server. Try again later.")
-        return -1, -1, -1
+        print("Failed to connect to {}. Try again later.".format(username))
+        return -1, Response(status=503), -1
 
 
 def compose_message(target_ip, target_port, user):
@@ -241,15 +286,18 @@ def server(ipaddress, local_port, user):
     """
     app.run(host=ipaddress, port=local_port)
 
+@app.route("/isalive", methods=["GET"])
+def is_alive():
+    return Response(status=200)
+
 
 @app.route("/p2p_post", methods=["POST"])
 def p2p_post():
     """
-    Recoit le message d'un client et l'affiche dans la console
+    Receive and display client's message.
     """
     data = request.get_json()
     text = data.get("text", "")
-    ip = data.get("ip", "")
     print("<< {} : {}".format(user, text))
     return data
 
@@ -276,23 +324,36 @@ def p2p_post_and_sign():
     print("<< {} : {}".format(user, text, signature))
     return data
 
-
 if __name__ == "__main__":
     ARGS = docopt(__doc__)
 
+    server_ip = "0.0.0.0"
+    server_port = ARGS["--port_server"]
     user = ARGS["--buddy"]
-    target_ip = ARGS["--ip"]
-    target_port = ARGS["--port_dest"]
-    ip = ARGS["--ip"]
+    source_ip = "0.0.0.0"
     source_port = ARGS["--port_source"]
-    try:
-        thread1 = threading.Thread(
-            target=compose_message, args=(target_ip, target_port, user)
-        )
-        thread2 = threading.Thread(target=server, args=(ip, source_port, user))
-        thread1.start()
-        thread2.start()
-        thread1.join()
-        thread2.join()
-    except KeyboardInterrupt:
-        print("Press Ctrl+C to remove server part")
+
+    # Register in database via server
+    (msg_received, status, reason) = input_register(
+        server_ip, server_port, source_ip, source_port
+    )
+    # Get user ip and port
+    (msg_received, status, reason) = get_ip_port(server_ip, server_port, user)
+    if status == 200:
+        msg_json = json.loads(msg_received)
+
+        target_port = msg_json["port"]
+        ip = msg_json["ip"]
+        try:
+            thread1 = threading.Thread(
+                target=compose_message, args=(ip, target_port, user)
+            )
+            thread2 = threading.Thread(target=server, args=(ip, source_port, user))
+            thread1.start()
+            thread2.start()
+            thread1.join()
+            thread2.join()
+        except KeyboardInterrupt:
+            print("Press Ctrl+C to remove server part")
+    else:
+        print("Server status : {}".format(status))
