@@ -12,6 +12,8 @@ Options:
 import http.client
 import json
 import threading
+import bdd
+
 
 from docopt import docopt
 from flask import Flask, Response, request
@@ -19,14 +21,22 @@ from flask import Flask, Response, request
 app = Flask(__name__)
 
 
-def register(server_ip, server_port, ip, source_port):
+def input_register(server_ip, server_port, ip, source_port):
+    name_user = input("Please enter your username : ")
+    pwd = input("Please enter your password : ")
+    (msg_received, status, reason) = register(
+        server_ip, server_port, ip, source_port, name_user, pwd
+    )
+    return msg_received, status, reason
+
+
+def register(server_ip, server_port, ip, source_port, name_user, pwd):
     try:
         conn = http.client.HTTPConnection(server_ip, server_port)
         http_headers = {"Content-Type": "application/json"}
-        name_user = input("Please enter your username : ")
-        pwd = input("Please enter your password : ")
-        ip = ip + ":" + source_port
-        data_to_server = {"username": name_user, "pwd": pwd, "ip": ip, "key": ""}
+        ip = ip + ":" + str(source_port)
+        key = bdd.create_random_string(64)
+        data_to_server = {"username": name_user, "pwd": pwd, "ip": ip, "key": key}
         json_data = json.dumps(data_to_server)
 
         conn.request("POST", "/register", json_data, http_headers)
@@ -122,9 +132,9 @@ if __name__ == "__main__":
     source_port = ARGS["--port"]
 
     # Register in database via server
-    # (msg_received, status, reason) = register(
-    #     server_ip, server_port, source_ip, source_port
-    # )
+    (msg_received, status, reason) = input_register(
+        server_ip, server_port, source_ip, source_port
+    )
     # Get user ip and port
     (msg_received, status, reason) = get_ip_port(server_ip, server_port, user)
     if status == 200:
