@@ -36,11 +36,10 @@ class TestP2PClient(unittest.TestCase):
         cmd_client = "python3 p2p_client.py --buddy={} --port={}".format(
             self.username_2, self.port_user_1
         )
-        args_client= shlex.split(cmd_client)
+        args_client = shlex.split(cmd_client)
         # launch command as a subprocess
         self.user_subprocess = subprocess.Popen(args_client)
         time.sleep(3)
-
 
     def test_send_message(self):
         # Test Bob's client part, wants to talk to Alice user with a json msg
@@ -93,7 +92,9 @@ class TestP2PClient(unittest.TestCase):
         self.assertEqual(data_send["text"], dico_msg["text"])
         self.assertNotEqual(data_send["text"], self.msg_json_user_2["text"])
         self.assertEqual(data_send["username"], self.msg_json_user_2["username"])
-        self.assertEqual(data_send["text"]["username"], self.msg_json_user_2["username"])
+        self.assertEqual(
+            data_send["text"]["username"], self.msg_json_user_2["username"]
+        )
         self.assertEqual(server_status, 200)
         self.assertEqual(server_reason, "OK")
 
