@@ -102,7 +102,6 @@ def sign_message(message, private_key, password):
 
     bytes_message = str.encode(message)
     signature = crypto.sign(pkey, bytes_message, "sha256")
-
     return bytes_message, signature
 
 
@@ -140,6 +139,8 @@ def verify_sign(bytes_message, signature, certificate):
         print("Message is not signed")
     return 0, 0
 
+def sign_and_send_message(message,private,password, target_ip, target_port, username):
+    return -1,-1,-1
 
 def send_message(message, target_ip, target_port, username):
     """
@@ -217,6 +218,16 @@ def p2p_post_key():
     print("<< {} : {}".format(user, clef_publique))
     return data
 
+@app.route("/p2p_post_msg_sign", methods=["POST"])
+def p2p_post_key():
+    """
+    Recoit le message d'un client et l'affiche dans la console
+    """
+    data = request.get_json()
+    text = data.get("text", "")
+    signature = data.get("signature","")
+    print("<< {} : {}".format(user, text,signature))
+    return data
 
 if __name__ == "__main__":
     ARGS = docopt(__doc__)

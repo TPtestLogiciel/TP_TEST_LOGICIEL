@@ -43,6 +43,7 @@ class TestP2PClient(unittest.TestCase):
     password = "azertyuiop"
     certificate2 = "/home/steven/cert2.pem"
 
+
     def setUp(self):
         # Launch User1 Ground terminal
         cmdGround = "python3 p2p_client.py --buddy={} --port_dest={}\
@@ -215,6 +216,24 @@ class TestP2PClient(unittest.TestCase):
         sys.stdout = sys.__stdout__
         self.assertEqual("Message is not signed\n", get_printed_output.getvalue())
 
+
+        
+        def test_sign_and_send_message(self):
+        # Test response and connection to server Ground with client
+        # Air with a string msg and sign
+        (dataSend, serverStatus, serverReason) = p2p_client.sign_and_send_message(
+            self.msgFromAir,self.private_key,self.password, self.ip, self.portUser2, self.buddyUsr1
+        )
+        dataSend = json.loads(dataSend)
+
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        p2p_client.verify_sign(dataSend["text"],dataSend["signature"], self.certificate2)
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Message is signed\n", get_printed_output.getvalue())
+        
+        self.assertEqual(serverStatus, 200)
+        self.assertEqual(serverReason, "OK")
 
 if __name__ == "__main__":
     unittest.main()
