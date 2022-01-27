@@ -145,6 +145,18 @@ def bdd_add(username, password, ip, clef_pub):
     bdd_show()
     return 1
 
+def bdd_get_ip_port(username):
+    conn,cur=connect_db()
+
+    cur.execute("SELECT ip FROM BDD WHERE username=:username",{"username":username})
+    ret = cur.fetchall()
+
+    bdd_close(conn,cur)
+    if len(ret) != 1:
+        return False, False
+    List_elem_port = ret[0][0].split(":")
+    return List_elem_port[0],List_elem_port[1]
+
 def bdd_show():
     conn,cur=connect_db()
     cur.execute("SELECT * FROM bdd")
