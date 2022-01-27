@@ -12,4 +12,5 @@ python3 --version
 ls workflow/
 cd workflow/
 find ./ -type f -name "test*.py" | xargs -n 1 python3 || true
-
+rm -rf ./*
+ls
