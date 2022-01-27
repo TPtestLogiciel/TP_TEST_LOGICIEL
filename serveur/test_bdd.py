@@ -187,11 +187,11 @@ class test_bdd_srv(unittest.TestCase):
         self.assertFalse(bdd.check_ip("30.100.128.12:-60"))  # negative port
         self.assertFalse(bdd.check_ip("30.100.128.12:afdeh"))  # non numerical port
         self.assertFalse(bdd.check_ip("30.100.128.12:108:200:300"))  # many ports ':'
-    
+
     def test_get_IP(self):
         signature = "\xce578"
-        ip=self.create_random_ip()
-        key=self.create_random_string(64)
+        ip = self.create_random_ip()
+        key = self.create_random_string(64)
         self.assertTrue(
             bdd.bdd_add(
                 self.test_db,
@@ -202,8 +202,7 @@ class test_bdd_srv(unittest.TestCase):
                 signature,
             )
         )
-        self.assertEqual(bdd.bdd_get_ip(self.test_db,"aabbaa"),ip)
-
+        self.assertEqual(bdd.bdd_get_ip(self.test_db, "aabbaa"), ip)
 
 
 if __name__ == "__main__":
