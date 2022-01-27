@@ -19,3 +19,5 @@ RUN pip3 install asyncio
 RUN pip3 install docopt
 RUN pip3 install flask
 RUN pip3 install pylint
+
+COPY TP_TEST_LOGICIEL/* ./workflow/
