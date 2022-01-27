@@ -21,19 +21,25 @@ class TestP2PClient(unittest.TestCase):
     msg_from_user_2 = "Hi Alice, it's a message from Bob!"
     msg_json_user_2 = {"username": username_1, "text": msg_from_user_2}
 
-
     local_ip = "0.0.0.0"
     server_port = 8000
+    ip_register = local_ip + ":" + str(port_user_1)
     json_from_server = {
         "username": username_1,
         "ip": local_ip,
         "port": port_user_1,
     }
-    ip_register = local_ip + ":" + port_user_1
-    register_username_1 = {"username": username_1, "pwd": "zlldo#58DDZF", "ip": ip_register, "key": ""}
+    pwd_user_1 = "zlldo#58DDZF"
+    register_username_1 = {
+        "username": username_1,
+        "pwd": "zlldo#58DDZF",
+        "ip": ip_register,
+        "key": "",
+    }
 
     def setUp(self):
         # Launch server subprocess
+        print("LAUNCH SERVEUR SUBPROCESS\n")
         cmd_server = "python3 server.py"
         args_server = shlex.split(cmd_server)
         # launch command as a subprocess
@@ -41,28 +47,34 @@ class TestP2PClient(unittest.TestCase):
         time.sleep(3)
 
         # Launch client p2p subprocess, Alice user
+        print("LAUNCH ALICE SUBPROCESS\n")
         cmd_client = "python3 p2p_client.py --buddy={} --port={}".format(
             self.username_2, self.port_user_1
         )
         args_client = shlex.split(cmd_client)
         # launch command as a subprocess
         self.user_subprocess = subprocess.Popen(args_client)
-        time.sleep(3)
+        time.sleep(10)
+
+
+    def test_register(self):
+        (data_send, server_status, server_reason) = p2p_client.register(
+            self.local_ip,
+            self.server_port,
+            self.local_ip,
+            self.port_user_1,
+            self.username_1,
+            self.pwd_user_1,
+        )
+        data_send = json.loads(data_send)
+        self.assertEqual(data_send["username"], self.register_username_1["username"])
+        self.assertEqual(data_send["ip"], self.register_username_1["ip"])
+        self.assertEqual(server_status, 200)
+        self.assertEqual(server_reason, "OK")
 
     def test_get_ip_port(self):
         (data_send, server_status, server_reason) = p2p_client.get_ip_port(
             self.local_ip, self.server_port, self.username_1
-        )
-        data_send = json.loads(data_send)
-        self.assertEqual(data_send["username"], self.json_from_server["username"])
-        self.assertEqual(data_send["ip"], self.json_from_server["ip"])
-        self.assertEqual(data_send["port"], self.json_from_server["port"])
-        self.assertEqual(server_status, 200)
-        self.assertEqual(server_reason, "OK")
-
-    def test_register(self):
-        (data_send, server_status, server_reason) = p2p_client.register(
-            self.local_ip, self.server_port, self.local_ip, self.port_user_1
         )
         data_send = json.loads(data_send)
         self.assertEqual(data_send["username"], self.json_from_server["username"])
