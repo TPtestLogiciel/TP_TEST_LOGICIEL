@@ -34,6 +34,7 @@ class test_bdd_srv(unittest.TestCase):
         self.assertIn("password", names)
         self.assertIn("ip", names)
         self.assertIn("clef_pub", names)
+        self.assertIn("signature", names)
 
         self.assertFalse(
             bdd.bdd_creation(self.test_db)
@@ -80,6 +81,9 @@ class test_bdd_srv(unittest.TestCase):
             )  # terrible code to generate a random string
         )
         self.assertFalse(bdd.check_key(""))
+    
+    def test_check_signature(self):
+        self.assertFalse(bdd.check_signature(""))
 
     def create_random_ip(self):
         ip_temp = ".".join(map(str, (random.randint(0, 255) for _ in range(4))))
@@ -92,11 +96,12 @@ class test_bdd_srv(unittest.TestCase):
         key = self.create_random_string(
             64
         )  # nobody said anything about using 4 times the same key (yet)
+        signature ="\x56"
         self.assertFalse(
-            bdd.bdd_add(self.test_db, "aaa", "aAaa#a9aa", self.create_random_ip(), key)
+            bdd.bdd_add(self.test_db, "aaa", "aAaa#a9aa", self.create_random_ip(), key, signature)
         )  # bad username
         self.assertFalse(
-            bdd.bdd_add(self.test_db, "aaaa", "", self.create_random_ip(), key)
+            bdd.bdd_add(self.test_db, "aaaa", "", self.create_random_ip(), key, signature)
         )  # bad password
         self.assertFalse(
             bdd.bdd_add(
@@ -105,20 +110,27 @@ class test_bdd_srv(unittest.TestCase):
                 "aAaa#a9aa",
                 self.create_random_ip(),
                 self.create_random_string(63),
+                signature
             )
         )  # bad key
+        
+        self.assertFalse(
+            bdd.bdd_add(self.test_db, "aaaa", "aAaa#a9aa", self.create_random_ip(), key, "")
+        )  # Bad signature
+        
         self.assertTrue(
-            bdd.bdd_add(self.test_db, "aaaa", "aAaa#a9aa", self.create_random_ip(), key)
+            bdd.bdd_add(self.test_db, "aaaa", "aAaa#a9aa", self.create_random_ip(), key, signature)
         )
         self.assertFalse(
-            bdd.bdd_add(self.test_db, "aaaa", "aAaa#a9aa", self.create_random_ip(), key)
+            bdd.bdd_add(self.test_db, "aaaa", "aAaa#a9aa", self.create_random_ip(), key, signature)
         )  # Not supposed to be able to add 2* same user
 
     def test_user_login(self):
         # Let's add a correct user :
         key = self.create_random_string(64)
+        signature = '\x67e'
         self.assertTrue(
-            bdd.bdd_add(self.test_db, "cccc", "aAaa#a9aa", self.create_random_ip(), key)
+            bdd.bdd_add(self.test_db, "cccc", "aAaa#a9aa", self.create_random_ip(), key, signature)
         )
         self.assertTrue(bdd.check_user_login(self.test_db, "cccc", "aAaa#a9aa"))
         self.assertFalse(
