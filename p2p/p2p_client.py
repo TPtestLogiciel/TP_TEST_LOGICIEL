@@ -24,7 +24,7 @@ from docopt import docopt
 from flask import Flask, Response, request
 from OpenSSL import crypto
 
-import bdd
+# import bdd
 
 app = Flask(__name__)
 
@@ -43,7 +43,20 @@ def register(server_ip, server_port, ip, source_port, name_user, pwd):
         conn = http.client.HTTPConnection(server_ip, server_port)
         http_headers = {"Content-Type": "application/json"}
         ip = ip + ":" + str(source_port)
-        key = bdd.create_random_string(64)
+        key_name = input("Donner la clé:")
+
+        if os.path.exists(key_name):
+            last_four_char = key_name[-4:]
+            if last_four_char == ".pem":
+                key_file = open(key_name, mode="r")
+                key_content = key_file.read()
+                key_file.close()
+            else:
+                print("Error : File is not a key")
+        else:
+            print("Error : File does not exist")
+        key=key_content
+
         data_to_server = {"username": name_user, "pwd": pwd, "ip": ip, "key": key}
         json_data = json.dumps(data_to_server)
 

@@ -60,7 +60,7 @@ class TestP2PClient(unittest.TestCase):
     def setUp(self):
         # Launch server subprocess
         print("LAUNCH SERVEUR SUBPROCESS\n")
-        cmd_server = "python3 server.py"
+        cmd_server = "python3 ../serveur/serveur.py --port={}".format(self.server_port)
         args_server = shlex.split(cmd_server)
         # launch command as a subprocess
         self.server_subprocess = subprocess.Popen(args_server)
@@ -74,7 +74,7 @@ class TestP2PClient(unittest.TestCase):
         args_client = shlex.split(cmd_client)
         # launch command as a subprocess
         self.user_subprocess = subprocess.Popen(args_client)
-        time.sleep(10)
+        time.sleep(15)
 
     def test_register(self):
         (data_send, server_status, server_reason) = p2p_client.register(

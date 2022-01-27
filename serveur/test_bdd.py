@@ -34,7 +34,6 @@ class test_bdd_srv(unittest.TestCase):
         self.assertIn("password", names)
         self.assertIn("ip", names)
         self.assertIn("clef_pub", names)
-        self.assertIn("signature", names)
 
         self.assertFalse(
             bdd.bdd_creation(self.test_db)
@@ -62,106 +61,80 @@ class test_bdd_srv(unittest.TestCase):
             bdd.check_password("aAaa#aaaa")
         )  # good size MAJ Special no number
 
-    def create_random_string(self, n):
-        return "".join(
-            random.choices(
-                string.ascii_letters + string.digits + string.punctuation, k=n
-            )
-        )
 
     def test_check_key(self):
         self.assertTrue(
             bdd.check_key(
-                self.create_random_string(64)
+                bdd.create_random_string(64)
             )  # terrible code to generate a random string
         )
         self.assertFalse(
             bdd.check_key(
-                self.create_random_string(63)
+                bdd.create_random_string(63)
             )  # terrible code to generate a random string
         )
         self.assertFalse(bdd.check_key(""))
 
-    def test_check_signature(self):
-        self.assertFalse(bdd.check_signature(""))
 
-    def create_random_ip(self):
-        ip_temp = ".".join(map(str, (random.randint(0, 255) for _ in range(4))))
-        ip = ip_temp + ":"
-
-        ip_final = ip + str(random.randint(0, 10000))
-        return ip_final
 
     def test_add(self):
-        key = self.create_random_string(
+        key = bdd.create_random_string(
             64
         )  # nobody said anything about using 4 times the same key (yet)
-        signature = "\x56"
-        self.assertFalse(
+        self.assertEqual(
             bdd.bdd_add(
                 self.test_db,
                 "aaa",
                 "aAaa#a9aa",
-                self.create_random_ip(),
-                key,
-                signature,
-            )
+                bdd.create_random_ip(),
+                key
+            ),455
         )  # bad username
-        self.assertFalse(
+        self.assertEqual(
             bdd.bdd_add(
-                self.test_db, "aaaa", "", self.create_random_ip(), key, signature
-            )
+                self.test_db, "aaaa", "", bdd.create_random_ip(), key 
+            ),457
         )  # bad password
-        self.assertFalse(
+        self.assertEqual(
             bdd.bdd_add(
                 self.test_db,
                 "aaaa",
                 "aAaa#a9aa",
-                self.create_random_ip(),
-                self.create_random_string(63),
-                signature,
-            )
+                bdd.create_random_ip(),
+                bdd.create_random_string(63)
+            ),458
         )  # bad key
-
-        self.assertFalse(
-            bdd.bdd_add(
-                self.test_db, "aaaa", "aAaa#a9aa", self.create_random_ip(), key, ""
-            )
-        )  # Bad signature
 
         self.assertTrue(
             bdd.bdd_add(
                 self.test_db,
                 "aaaa",
                 "aAaa#a9aa",
-                self.create_random_ip(),
-                key,
-                signature,
+                bdd.create_random_ip(),
+                key
             )
         )
-        self.assertFalse(
+        self.assertEqual(
             bdd.bdd_add(
                 self.test_db,
                 "aaaa",
                 "aAaa#a9aa",
-                self.create_random_ip(),
-                key,
-                signature,
-            )
+                bdd.create_random_ip(),
+                key
+            ),459
         )  # Not supposed to be able to add 2* same user
 
     def test_user_login(self):
         # Let's add a correct user :
-        key = self.create_random_string(64)
-        signature = "\x67e"
+        key = bdd.create_random_string(64)
+
         self.assertTrue(
             bdd.bdd_add(
                 self.test_db,
                 "cccc",
                 "aAaa#a9aa",
-                self.create_random_ip(),
-                key,
-                signature,
+                bdd.create_random_ip(),
+                key
             )
         )
         self.assertTrue(bdd.check_user_login(self.test_db, "cccc", "aAaa#a9aa"))
@@ -173,7 +146,7 @@ class test_bdd_srv(unittest.TestCase):
         )  # Bad Username
 
     def test_check_ip(self):
-        self.assertTrue(bdd.check_ip(self.create_random_ip()))  # good Ip
+        self.assertTrue(bdd.check_ip(bdd.create_random_ip()))  # good Ip
         self.assertFalse(bdd.check_ip(""))  # empty list
         self.assertFalse(bdd.check_ip("1.4.126.79.78"))  # greater size
         self.assertFalse(bdd.check_ip("1.2"))  # lesser size
@@ -188,31 +161,16 @@ class test_bdd_srv(unittest.TestCase):
         self.assertFalse(bdd.check_ip("30.100.128.12:afdeh"))  # non numerical port
         self.assertFalse(bdd.check_ip("30.100.128.12:108:200:300"))  # many ports ':'
 
-    def test_get_IP(self):
-        signature = "\xce578"
-        ip = self.create_random_ip()
-        key = self.create_random_string(64)
-        self.assertTrue(
-            bdd.bdd_add(
-                self.test_db,
-                "aabbaa",
-                "aAaa#a9aa",
-                ip,
-                key,
-                signature,
-            )
-        )
-        self.assertEqual(bdd.bdd_get_ip(self.test_db, "aabbaa"), ip)
 
     def test_get_ip(self):
         # Let's add a correct user :
-        key = self.create_random_string(64)
-        self.assertTrue(edern_bdd.bdd_add("cccc", "aAaa#a9aa", "192.168.0.1:8000", key))
+        key = bdd.create_random_string(64)
+        self.assertEqual(bdd.bdd_add(self.test_db,"cccc", "aAaa#a9aa", "192.168.0.1:8000", key),1)
         self.assertEqual(
-            edern_bdd.bdd_get_ip_port("cccc"), ("192.168.0.1", "8000")
+            bdd.bdd_get_ip_port(self.test_db,"cccc"), ("192.168.0.1", "8000")
         )  # get the good IP
         self.assertEqual(
-            edern_bdd.bdd_get_ip_port("aaab"), (False, False)
+            bdd.bdd_get_ip_port(self.test_db,"aaab"), (False, False)
         )  # bad username
 
 

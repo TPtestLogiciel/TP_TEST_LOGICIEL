@@ -74,10 +74,6 @@ def register():
         print("|!| Error ", code, ":", error)
         return Response(status=code)
 
-    elif code == 460:
-        error = "Invalid signature"
-        print("|!| Error ", code, ":", error)
-        return Response(status=code)
     return payload
 
 
@@ -87,7 +83,7 @@ def get_ip_port(username):
     Receive and display client's message.
     """
     print("username in get_ip_port : ", username)
-    (ip, port) = bdd.bdd_get_ip_port(username)
+    (ip, port) = bdd.bdd_get_ip_port("data.db",username)
     if (ip, port) != (False, False):
         response = {"username": username, "ip": ip, "port": port}
     else:
@@ -99,7 +95,12 @@ def get_ip_port(username):
 if __name__ == "__main__":
     ARGS = docopt(__doc__)
     if ARGS["--port"]:
-        bdd.bdd_creation()
+        bdd.bdd_creation("data.db")
+        bdd.bdd_add("data.db",
+                "Maurice",
+                "aAaa#a9aa",
+                "0.0.0.0:6840",
+                bdd.create_random_string(64))
         APP.run(host="0.0.0.0", port=ARGS["--port"])
     else:
         logging.error("Wrong command line arguments")
