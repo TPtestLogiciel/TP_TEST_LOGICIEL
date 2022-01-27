@@ -50,6 +50,12 @@ def check_user_login(db_path, username, password):
     return True
 
 
+def check_signature(signature):
+    if len(signature) < 1:
+        return False
+    return True
+
+
 def check_ip(ip):
     List_elem_port = ip.split(":")
     List_elem_ip = List_elem_port[0].split(".")
@@ -111,7 +117,8 @@ def bdd_creation(db_path):
                   username TEXT NOT NULL,
                   password TEXT NOT NULL,
 				  ip TEXT NOT NULL,
-				  clef_pub TEXT NOT NULL
+				  clef_pub TEXT NOT NULL,
+                  signature TEXT NOT NULL
            );"""
 
     cur.execute(sql)
@@ -120,21 +127,24 @@ def bdd_creation(db_path):
     return True
 
 
-def bdd_add(db_path, username, password, ip, clef_pub):
+def bdd_add(db_path, username, password, ip, clef_pub, signature):
     conn, cur = connect_db(db_path)
     test_username = check_username(username)
     test_password = check_password(password)
     test_ip = check_ip(ip)
     test_clef = check_key(clef_pub)
     test_user_login = check_user_login(db_path, username, password)
+    test_signature = check_signature(signature)
 
     if test_user_login == True:
         return False
-    if (test_clef and test_ip and test_password and test_username) == False:
+    if (
+        test_clef and test_ip and test_password and test_username and test_signature
+    ) == False:
         return False
 
-    sql = "INSERT INTO bdd (username, password, ip, clef_pub) VALUES (?, ?, ?, ?)"
-    value = (username, password, ip, clef_pub)
+    sql = "INSERT INTO bdd (username, password, ip, clef_pub, signature) VALUES (?, ?, ?, ?, ?)"
+    value = (username, password, ip, clef_pub, signature)
     cur.execute(sql, value)
     conn.commit()
     print("Adding data")
