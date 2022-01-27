@@ -47,7 +47,7 @@ def register():
         print("|!| Error 454 :", error)
         return Response(status=454)
 
-    code = bdd.bdd_add(
+    code = bdd.bdd_add("data.db",
         payload["username"], payload["pwd"], payload["ip"], payload["key"]
     )
 
