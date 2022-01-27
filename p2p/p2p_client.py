@@ -100,15 +100,18 @@ def sign_message(message, private_key, password):
 
     pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, key_content, password.encode())
 
-    bytes_message = str.encode(message)
+    bytes_message = message.encode()
     signature = crypto.sign(pkey, bytes_message, "sha256")
-    return bytes_message, signature
+    signature_b64 = base64.b64encode(signature)
+    signature_b64_string = signature_b64.decode()
+    message=bytes_message.decode()
+    return message, signature_b64_string
 
 
-def verify_sign(bytes_message, signature, certificate):
+def verify_sign(message, signature_b64_string, certificate):
     """
-    Arguments : le message signé à vérifier (bytes)
-                lal signature du message(bytes)
+    Arguments : le message signé à vérifier (string)
+                lal signature du message(b64_string)
                 le certificate pour vérifier la signature (path)
     -Lire le contenue du certificate
     -Charger le certificate
@@ -132,15 +135,52 @@ def verify_sign(bytes_message, signature, certificate):
 
     cert = crypto.load_certificate(crypto.FILETYPE_PEM, certificate_content)
 
+    signature_b64 = signature_b64_string.encode()
+    signature = base64.b64decode(signature_b64)
+    bytes_message = message.encode()
     try:
         OpenSSL.crypto.verify(cert, signature, bytes_message, "sha256")
+        message = bytes_message.decode()
         print("Message is signed")
     except:
+        message = bytes_message.decode()
         print("Message is not signed")
     return 0, 0
 
-def sign_and_send_message(message,private,password, target_ip, target_port, username):
-    return -1,-1,-1
+def sign_and_send_message(message,private_key,password, target_ip, target_port, username):
+    """
+    Arguments : message a envoyer, 
+                la clé privé pour signer le message
+                le password de la clé privé
+                l'adresse IP du destinataire,
+                le port du destinataire et son username.
+    - Creation d'une connexion HTTP avec l'IP et le port destinataire
+    - Envoi d'un JSON avec l'username du destinataire, le coeur
+    du message, et la signature
+    - Requete POST a la partie serveur du destinataire
+    - Recupere les reponses de la partie serveur du destinataire
+    Retourne le message recu par le serveur, le status du serveur et
+    la raison associee.
+    """
+    # print("-- post function called --")
+    try:
+        conn = http.client.HTTPConnection(target_ip, target_port)
+        headers = {"Content-Type": "application/json"}
+        message_signe,signature = sign_message(message,private_key,password)
+
+        dataToServer = {"username": username, "text": message_signe, "signature": signature}
+        jsonData = json.dumps(dataToServer)
+        print(jsonData)
+        conn.request("POST", "/p2p_post_and_sign", jsonData, headers)
+        response = conn.getresponse()
+        msgReceived = response.read().decode()
+        serverStatus = response.status
+        serverReason = response.reason
+        return msgReceived, serverStatus, serverReason
+    except ConnectionRefusedError:
+        print("Failed to connect to server. Try again later.")
+        return -1, -1, -1
+
 
 def send_message(message, target_ip, target_port, username):
     """
@@ -217,7 +257,7 @@ def p2p_post_key():
     print("<< {} : {}".format(user, clef_publique))
     return data
 
-@app.route("/p2p_post_msg_sign", methods=["POST"])
+@app.route("/p2p_post_and_sign", methods=["POST"])
 def p2p_post_and_sign():
     """
     Recoit le message d'un client et l'affiche dans la console
@@ -225,7 +265,7 @@ def p2p_post_and_sign():
     data = request.get_json()
     text = data.get("text", "")
     signature = data.get("signature","")
-    print("<< {} : {}".format(user, text,signature))
+    print("<< {} : {}".format(user, text, signature))
     return data
 
 if __name__ == "__main__":
