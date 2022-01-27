@@ -1,7 +1,11 @@
+import os
 import sqlite3
 
-conn = sqlite3.connect("data.db")
-cur = conn.cursor()
+
+def connect_db(db_path):
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    return conn, cur
 
 
 def check_username(username):
@@ -34,13 +38,20 @@ def check_key(key):
     return True
 
 
-def check_user_login(username, password):
-    cur = conn.cursor()
+def check_user_login(db_path, username, password):
+    # cur = conn.cursor()
+    conn, cur = connect_db(db_path)
     cur.execute(
         "SELECT password FROM BDD WHERE username=:username", {"username": username}
     )
     ret = cur.fetchall()
     if len(ret) != 1 or password != ret[0][0]:
+        return False
+    return True
+
+
+def check_signature(signature):
+    if len(signature) < 1:
         return False
     return True
 
@@ -93,8 +104,11 @@ def check_ip(ip):
     return True
 
 
-def bdd_creation():
+def bdd_creation(db_path):
 
+    if os.path.isfile(db_path):
+        return False
+    conn, cur = connect_db(db_path)
     sql = "DROP TABLE IF EXISTS BDD"
     cur.execute(sql)
     conn.commit()
@@ -103,7 +117,8 @@ def bdd_creation():
                   username TEXT NOT NULL,
                   password TEXT NOT NULL,
 				  ip TEXT NOT NULL,
-				  clef_pub TEXT NOT NULL
+				  clef_pub TEXT NOT NULL,
+                  signature TEXT NOT NULL
            );"""
 
     cur.execute(sql)
@@ -112,36 +127,54 @@ def bdd_creation():
     return True
 
 
-def bdd_add(username, password, ip, clef_pub):
+def bdd_add(db_path, username, password, ip, clef_pub, signature):
+    conn, cur = connect_db(db_path)
     test_username = check_username(username)
     test_password = check_password(password)
     test_ip = check_ip(ip)
     test_clef = check_key(clef_pub)
-    test_user_login = check_user_login(username, password)
+    test_user_login = check_user_login(db_path, username, password)
+    test_signature = check_signature(signature)
 
     if test_user_login == True:
         return False
-    if (test_clef and test_ip and test_password and test_username) == False:
+    if (
+        test_clef and test_ip and test_password and test_username and test_signature
+    ) == False:
         return False
 
-    sql = "INSERT INTO bdd (username, password, ip, clef_pub) VALUES (?, ?, ?, ?)"
-    value = (username, password, ip, clef_pub)
+    sql = "INSERT INTO bdd (username, password, ip, clef_pub, signature) VALUES (?, ?, ?, ?, ?)"
+    value = (username, password, ip, clef_pub, signature)
     cur.execute(sql, value)
     conn.commit()
     print("Adding data")
-    bdd_show()
+    bdd_show(db_path)
     return True
 
 
-def bdd_show():
+def bdd_show(db_path):
+    conn, cur = connect_db(db_path)
     cur.execute("SELECT * FROM bdd")
     result = cur.fetchall()
     for row in result:
         print(row)
         print("\n")
 
+def bdd_get_ip(db_path,username):
+    conn,cur=connect_db(db_path)
 
-def bdd_close():
+    cur.execute("SELECT ip FROM BDD WHERE username=:username",{"username":username})
+    ret = cur.fetchall()
+
+    if len(ret) != 1:
+        return False
+    print("ret=")
+    print(ret[0][0])
+
+    return ret[0][0]
+
+def bdd_close(db_path):
+    conn, cur = connect_db(db_path)
     cur.close()
     conn.close()
     print("SQL connection is closed")
