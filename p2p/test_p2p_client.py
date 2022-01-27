@@ -1,14 +1,34 @@
+import http.client
+import io
+
 import json
 import shlex
 import subprocess
+import sys
 import time
 import unittest
-from unittest.mock import MagicMock, patch
 
+import requests
 import p2p_client
+
+# Pour generer une cle privé :
+# $ openssl genrsa -aes128 -passout pass:<password> -out private.pem 4096
+
+# Pour generer une cle publique a partir de la cle privé
+# $ openssl rsa -in private.pem -passin pass:<password> -pubout -out public.pem
+
+# Pour generer un certificat a partir de la cle privé
+# $ openssl req -new -x509 -sha256 -key private.pem -out cert.pem -days <int>
+# NE PAS OUBLIER DE MODIFIER LES PATH DANS LES VARIABLES
 
 
 class TestP2PClient(unittest.TestCase):
+
+    certificate_from_air = "cert.pem"  # path du certificat.pem
+    private_key = "private.pem"
+    password = "azertyuiop"
+    certificate2 = "cert2.pem"
+
     user_subprocess = None
     server_subprocess = None
 
@@ -162,6 +182,106 @@ class TestP2PClient(unittest.TestCase):
         print("killing subprocess server")
         self.server_subprocess.kill()
         self.server_subprocess.wait()
+
+
+    # Test de la fonction send_public_key()
+    def test_certificate_key(self):
+
+        # Test du fichier envoyé
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        self.assertEqual(
+            p2p_client.send_certificate("file_not_found", "0.0.0.0", "8000", "8080"),
+            (-1, -1, -1),
+        )
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Error : File does not exist\n", get_printed_output.getvalue())
+
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        self.assertEqual(
+            p2p_client.send_certificate("p2p_client.py", "0.0.0.0", "8000", "8080"),
+            (-1, -1, -1),
+        )
+        sys.stdout = sys.__stdout__
+        self.assertEqual(
+            "Error : File is not a certificate\n", get_printed_output.getvalue()
+        )
+
+        (dataSend, serverStatus, serverReason) = p2p_client.send_certificate(
+            self.certificate_from_air, self.ip, self.portUser2, self.buddyUsr1
+        )
+        dataSend = json.loads(dataSend)
+
+        # test contenu du fichier
+        self.assertEqual(len(dataSend["clef_pub"]), 1428)
+        self.assertEqual(dataSend["clef_pub"][:28], "-----BEGIN CERTIFICATE-----\n")
+        self.assertEqual((dataSend["clef_pub"][-26:]), "-----END CERTIFICATE-----\n")
+
+    def test_sign_and_verif_message(self):
+        # Test message signé et verification de la signature
+        (signed_message, sign) = p2p_client.sign_message(
+            "Message a signer", self.private_key, self.password
+        )
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        p2p_client.verify_sign(signed_message, sign, self.certificate_from_air)
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Message is signed\n", get_printed_output.getvalue())
+
+        # Test Vérification d'un message non signé et d'une signature random
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        p2p_client.verify_sign("Message non signée", sign, self.certificate_from_air)
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Message is not signed\n", get_printed_output.getvalue())
+
+        # Test message signé puis modification du message et verification signature
+        (signed_message, sign) = p2p_client.sign_message(
+            "Nouveau message à signer", self.private_key, self.password
+        )
+        signed_message += "Modification du message"
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        p2p_client.verify_sign(signed_message, sign, self.certificate_from_air)
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Message is not signed\n", get_printed_output.getvalue())
+
+        # Test message signé et Vérification avec un autre certificat
+        (signed_message, sign) = p2p_client.sign_message(
+            "Dernier message a signer", self.private_key, self.password
+        )
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        p2p_client.verify_sign(signed_message, sign, self.certificate2)
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Message is not signed\n", get_printed_output.getvalue())
+
+    def test_sign_and_send_message(self):
+        # Test response and connection to server Ground with client
+        # Air with a string msg and sign
+        (dataSend, serverStatus, serverReason) = p2p_client.sign_and_send_message(
+            self.msgFromAir,
+            self.private_key,
+            self.password,
+            self.ip,
+            self.portUser2,
+            self.buddyUsr1,
+        )
+        dataSend = json.loads(dataSend)
+
+        get_printed_output = io.StringIO()
+        sys.stdout = get_printed_output
+        text = dataSend["text"]
+        signature = dataSend["signature"]
+        p2p_client.verify_sign(
+            dataSend["text"], dataSend["signature"], self.certificate_from_air
+        )
+        sys.stdout = sys.__stdout__
+        self.assertEqual("Message is signed\n", get_printed_output.getvalue())
+
+        self.assertEqual(serverStatus, 200)
+        self.assertEqual(serverReason, "OK")
 
 
 if __name__ == "__main__":
