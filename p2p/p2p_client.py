@@ -203,8 +203,7 @@ def p2p_post():
     data = request.get_json()
     text = data.get("text", "")
     ip = data.get("ip", "")
-    clef_publique = data.get("clef_pub", "")
-    print("<< {} : {}".format(user, text, clef_publique))
+    print("<< {} : {}".format(user, text))
     return data
 
 
@@ -219,7 +218,7 @@ def p2p_post_key():
     return data
 
 @app.route("/p2p_post_msg_sign", methods=["POST"])
-def p2p_post_key():
+def p2p_post_and_sign():
     """
     Recoit le message d'un client et l'affiche dans la console
     """

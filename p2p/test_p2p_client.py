@@ -218,7 +218,7 @@ class TestP2PClient(unittest.TestCase):
 
 
         
-        def test_sign_and_send_message(self):
+    def test_sign_and_send_message(self):
         # Test response and connection to server Ground with client
         # Air with a string msg and sign
         (dataSend, serverStatus, serverReason) = p2p_client.sign_and_send_message(
