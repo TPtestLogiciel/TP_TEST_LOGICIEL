@@ -14,7 +14,7 @@ import json
 import threading
 
 from docopt import docopt
-from flask import Flask, request, Response
+from flask import Flask, Response, request
 
 app = Flask(__name__)
 
@@ -75,6 +75,11 @@ def server(ip_address, local_port, user):
     app.run(host=ip_address, port=local_port)
 
 
+@app.route("/isalive", methods=["GET"])
+def is_alive():
+    return Response(status=200)
+
+
 @app.route("/p2p_post", methods=["POST"])
 def p2p_post():
     """
@@ -92,6 +97,7 @@ if __name__ == "__main__":
     server_ip = "0.0.0.0"
     server_port = 8000
     user = ARGS["--buddy"]
+    # send json to register : username, pwd, ip:port, key
     (msg_received, status, reason) = get_ip_port(server_ip, server_port, user)
     if status == 200:
         msg_json = json.loads(msg_received)
@@ -103,7 +109,9 @@ if __name__ == "__main__":
             thread1 = threading.Thread(
                 target=compose_message, args=(ip_address, target_port, user)
             )
-            thread2 = threading.Thread(target=server, args=(ip_address, source_port, user))
+            thread2 = threading.Thread(
+                target=server, args=(ip_address, source_port, user)
+            )
             thread1.start()
             thread2.start()
             thread1.join()
