@@ -10,7 +10,7 @@ import unittest
 
 import requests
 import p2p_client
-
+import os
 # Pour generer une cle privé :
 # $ openssl genrsa -aes128 -passout pass:<password> -out private.pem 4096
 
@@ -34,8 +34,8 @@ class TestP2PClient(unittest.TestCase):
 
     username_1 = "Alice"
     username_2 = "Bob"
-    port_user_1 = 8001
-    port_user_2 = 8002
+    port_user_1 = "8001"
+    port_user_2 = "8002"
     msg_from_user_1 = "Hello Bob, it's a message from Alice!"
     msg_json_user_1 = {"username": username_2, "text": msg_from_user_1}
     msg_from_user_2 = "Hi Alice, it's a message from Bob!"
@@ -56,7 +56,6 @@ class TestP2PClient(unittest.TestCase):
         "ip": ip_register,
         "key": "",
     }
-
     def setUp(self):
         # Launch server subprocess
         print("LAUNCH SERVEUR SUBPROCESS\n")
@@ -74,9 +73,19 @@ class TestP2PClient(unittest.TestCase):
         args_client = shlex.split(cmd_client)
         # launch command as a subprocess
         self.user_subprocess = subprocess.Popen(args_client)
-        time.sleep(15)
+        time.sleep(20)
 
     def test_register(self):
+        if os.path.exists(self.certificate_from_air):
+            last_four_char = self.certificate_from_air[-4:]
+            if last_four_char == ".pem":
+                key_file = open(self.certificate_from_air, mode="r")
+                key_content = key_file.read()
+                key_file.close()
+            else:
+                print("Error : File is not a key")
+        else:
+            print("Error : File does not exist")
         (data_send, server_status, server_reason) = p2p_client.register(
             self.local_ip,
             self.server_port,
@@ -84,7 +93,11 @@ class TestP2PClient(unittest.TestCase):
             self.port_user_1,
             self.username_1,
             self.pwd_user_1,
+            key_content,
         )
+        print("AAAAAAAAAAAAAAA")
+        print(data_send,server_status)
+
         data_send = json.loads(data_send)
         self.assertEqual(data_send["username"], self.register_username_1["username"])
         self.assertEqual(data_send["ip"], self.register_username_1["ip"])
@@ -104,6 +117,10 @@ class TestP2PClient(unittest.TestCase):
 
     def test_send_message(self):
         # Test Bob's client part, wants to talk to Alice user with a json msg
+        print(self.msg_from_user_2)
+        print(type(self.local_ip))
+        print(type(self.port_user_1))
+        print(type(self.username_1))
         (data_send, server_status, server_reason) = p2p_client.send_message(
             self.msg_from_user_2, self.local_ip, self.port_user_1, self.username_1
         )
@@ -209,7 +226,7 @@ class TestP2PClient(unittest.TestCase):
         )
 
         (dataSend, serverStatus, serverReason) = p2p_client.send_certificate(
-            self.certificate_from_air, self.ip, self.portUser2, self.buddyUsr1
+            self.certificate_from_air, self.local_ip, self.port_user_2, self.username_1
         )
         dataSend = json.loads(dataSend)
 
@@ -261,12 +278,12 @@ class TestP2PClient(unittest.TestCase):
         # Test response and connection to server Ground with client
         # Air with a string msg and sign
         (dataSend, serverStatus, serverReason) = p2p_client.sign_and_send_message(
-            self.msgFromAir,
+            self.msg_from_user_1,
             self.private_key,
             self.password,
-            self.ip,
-            self.portUser2,
-            self.buddyUsr1,
+            self.local_ip,
+            self.port_user_1,
+            self.username_1,
         )
         dataSend = json.loads(dataSend)
 

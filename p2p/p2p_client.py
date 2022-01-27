@@ -32,32 +32,30 @@ app = Flask(__name__)
 def input_register(server_ip, server_port, ip, source_port):
     name_user = input("Please enter your username : ")
     pwd = input("Please enter your password : ")
+    key_name = input("Donner la clé:")
+    if os.path.exists(key_name):
+        last_four_char = key_name[-4:]
+        if last_four_char == ".pem":
+            key_file = open(key_name, mode="r")
+            key_content = key_file.read()
+            key_file.close()
+        else:
+            print("Error : File is not a key")
+    else:
+        print("Error : File does not exist")
+    
     (msg_received, status, reason) = register(
-        server_ip, server_port, ip, source_port, name_user, pwd
+        server_ip, server_port, ip, source_port, name_user, pwd, key_content
     )
     return msg_received, status, reason
 
 
-def register(server_ip, server_port, ip, source_port, name_user, pwd):
+def register(server_ip, server_port, ip, source_port, name_user, pwd,key_content):
     try:
         conn = http.client.HTTPConnection(server_ip, server_port)
         http_headers = {"Content-Type": "application/json"}
         ip = ip + ":" + str(source_port)
-        key_name = input("Donner la clé:")
-
-        if os.path.exists(key_name):
-            last_four_char = key_name[-4:]
-            if last_four_char == ".pem":
-                key_file = open(key_name, mode="r")
-                key_content = key_file.read()
-                key_file.close()
-            else:
-                print("Error : File is not a key")
-        else:
-            print("Error : File does not exist")
-        key=key_content
-
-        data_to_server = {"username": name_user, "pwd": pwd, "ip": ip, "key": key}
+        data_to_server = {"username": name_user, "pwd": pwd, "ip": ip, "key": key_content}
         json_data = json.dumps(data_to_server)
 
         conn.request("POST", "/register", json_data, http_headers)
@@ -239,7 +237,7 @@ def sign_and_send_message(
         http_headers = {"Content-Type": "application/json"}
         message_signe, signature = sign_message(message, private_key, password)
 
-        dataToServer = {
+        data_to_server = {
             "username": username,
             "text": message_signe,
             "signature": signature,

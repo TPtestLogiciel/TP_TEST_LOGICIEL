@@ -46,9 +46,9 @@ def check_password(password):
 
 
 def check_key(key):
-    if len(key) != 64:
-        return False
-    return True
+    if len(key) >= 64:
+        return True
+    return False
 
 
 def check_user_login(db_path, username, password):
