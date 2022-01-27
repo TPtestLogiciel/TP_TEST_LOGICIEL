@@ -21,8 +21,16 @@ class TestP2PClient(unittest.TestCase):
     msg_from_user_2 = "Hi Alice, it's a message from Bob!"
     msg_json_user_2 = {"username": username_1, "text": msg_from_user_2}
 
+
     local_ip = "0.0.0.0"
     server_port = 8000
+    json_from_server = {
+        "username": username_1,
+        "ip": local_ip,
+        "port": port_user_1,
+    }
+    ip_register = local_ip + ":" + port_user_1
+    register_username_1 = {"username": username_1, "pwd": "zlldo#58DDZF", "ip": ip_register, "key": ""}
 
     def setUp(self):
         # Launch server subprocess
@@ -40,6 +48,28 @@ class TestP2PClient(unittest.TestCase):
         # launch command as a subprocess
         self.user_subprocess = subprocess.Popen(args_client)
         time.sleep(3)
+
+    def test_get_ip_port(self):
+        (data_send, server_status, server_reason) = p2p_client.get_ip_port(
+            self.local_ip, self.server_port, self.username_1
+        )
+        data_send = json.loads(data_send)
+        self.assertEqual(data_send["username"], self.json_from_server["username"])
+        self.assertEqual(data_send["ip"], self.json_from_server["ip"])
+        self.assertEqual(data_send["port"], self.json_from_server["port"])
+        self.assertEqual(server_status, 200)
+        self.assertEqual(server_reason, "OK")
+
+    def test_register(self):
+        (data_send, server_status, server_reason) = p2p_client.register(
+            self.local_ip, self.server_port, self.local_ip, self.port_user_1
+        )
+        data_send = json.loads(data_send)
+        self.assertEqual(data_send["username"], self.json_from_server["username"])
+        self.assertEqual(data_send["ip"], self.json_from_server["ip"])
+        self.assertEqual(data_send["port"], self.json_from_server["port"])
+        self.assertEqual(server_status, 200)
+        self.assertEqual(server_reason, "OK")
 
     def test_send_message(self):
         # Test Bob's client part, wants to talk to Alice user with a json msg
