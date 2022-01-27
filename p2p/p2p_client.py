@@ -25,9 +25,8 @@ def register(server_ip, server_port, ip, source_port):
         http_headers = {"Content-Type": "application/json"}
         name_user = input("Please enter your username : ")
         pwd = input("Please enter your password : ")
-        ip = ip + source_port
-        # data_to_server = {"name": name_user, "pwd": pwd, "ip":"192.0.0.5:4412","key":""}
-        data_to_server = {"name": name_user, "pwd": pwd, "ip": ip, "key": ""}
+        ip = ip + ":" + source_port
+        data_to_server = {"username": name_user, "pwd": pwd, "ip": ip, "key": ""}
         json_data = json.dumps(data_to_server)
 
         conn.request("POST", "/register", json_data, http_headers)
@@ -123,23 +122,21 @@ if __name__ == "__main__":
     source_port = ARGS["--port"]
 
     # Register in database via server
-    (msg_received, status, reason) = register(
-        server_ip, server_port, source_ip, source_port
-    )
+    # (msg_received, status, reason) = register(
+    #     server_ip, server_port, source_ip, source_port
+    # )
     # Get user ip and port
     (msg_received, status, reason) = get_ip_port(server_ip, server_port, user)
     if status == 200:
         msg_json = json.loads(msg_received)
 
         target_port = msg_json["port"]
-        ip_address = msg_json["ip_address"]
+        ip = msg_json["ip"]
         try:
             thread1 = threading.Thread(
-                target=compose_message, args=(ip_address, target_port, user)
+                target=compose_message, args=(ip, target_port, user)
             )
-            thread2 = threading.Thread(
-                target=server, args=(ip_address, source_port, user)
-            )
+            thread2 = threading.Thread(target=server, args=(ip, source_port, user))
             thread1.start()
             thread2.start()
             thread1.join()
