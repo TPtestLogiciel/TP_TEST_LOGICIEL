@@ -1,12 +1,13 @@
 """p2p_client
 
 Usage:
-    p2p_client.py --buddy=<buddy> --port=<int>
+    p2p_client.py --buddy=<buddy> --port_source=<int> --port_server=<int>
 
 Options:
     -h --help  Show this screen for help
     --buddy=<buddy>  the user we want to talk to
-    --port=<int>  source port
+    --port_source=<int>  source port
+    --port_server=<int>  source server
 """
 
 import http.client
@@ -126,10 +127,10 @@ if __name__ == "__main__":
     ARGS = docopt(__doc__)
 
     server_ip = "0.0.0.0"
-    server_port = 8000
+    server_port = ARGS["--port_server"]
     user = ARGS["--buddy"]
     source_ip = "0.0.0.0"
-    source_port = ARGS["--port"]
+    source_port = ARGS["--port_source"]
 
     # Register in database via server
     (msg_received, status, reason) = input_register(
