@@ -1,4 +1,6 @@
 import sqlite3
+import random
+import string
 
 
 def connect_db():
@@ -158,3 +160,33 @@ def bdd_close(conn,cur):
     cur.close()
     conn.close()
     print("SQLite connection is closed")
+
+def create_random_string(n):
+        return "".join(
+            random.choices(
+                string.ascii_letters + string.digits + string.punctuation, k=n
+            )
+        )
+
+def bdd_get_ip_port(username):
+    conn,cur=connect_db()
+
+    cur.execute("SELECT ip FROM BDD WHERE username=:username",{"username":username})
+    ret = cur.fetchall()
+
+    bdd_close(conn,cur)
+    if len(ret) != 1:
+        return False, False
+    List_elem_port = ret[0][0].split(":")
+    return List_elem_port[0],List_elem_port[1]
+
+
+if __name__ == "__main__":
+    bdd_creation()
+    key = create_random_string(64)
+    bdd_add("edern", "aAaa#a9aa", "0.0.0.0:8000", key)
+    bdd_show()
+    ip_working, port_working = bdd_get_ip_port("edern")
+    print("IP: " + ip_working + " Port: " + port_working)
+    ip_false, port_false = bdd_get_ip_port("annic")
+    print("IP: " + str(ip_false) + " Port: " + str(port_false))

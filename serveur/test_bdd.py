@@ -110,7 +110,6 @@ class test_bdd_srv(unittest.TestCase):
         self.assertFalse(bdd.check_ip("30.100.128.12:-60"))  # negative port
         self.assertFalse(bdd.check_ip("30.100.128.12:afdeh"))  # non numerical port
         self.assertFalse(bdd.check_ip("30.100.128.12:108:200:300"))  # many ports ':'
-
-
+        
 if __name__ == "__main__":
     unittest.main()
