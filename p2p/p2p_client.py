@@ -12,11 +12,11 @@ Options:
 import http.client
 import json
 import threading
-import bdd
-
 
 from docopt import docopt
 from flask import Flask, Response, request
+
+import bdd
 
 app = Flask(__name__)
 

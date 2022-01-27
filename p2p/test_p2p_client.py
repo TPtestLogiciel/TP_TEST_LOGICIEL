@@ -56,7 +56,6 @@ class TestP2PClient(unittest.TestCase):
         self.user_subprocess = subprocess.Popen(args_client)
         time.sleep(10)
 
-
     def test_register(self):
         (data_send, server_status, server_reason) = p2p_client.register(
             self.local_ip,
