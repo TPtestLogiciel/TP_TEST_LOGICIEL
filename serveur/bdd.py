@@ -114,12 +114,15 @@ def check_ip(ip):
 
 
 def bdd_creation(db_path):
+    if os.path.exists("data.db"):
+        os.remove("data.db")
 
     if os.path.isfile(db_path):
         return False
     conn, cur = connect_db(db_path)
     sql = "DROP TABLE IF EXISTS BDD"
     cur.execute(sql)
+    
     conn.commit()
 
     sql = """CREATE TABLE BDD (

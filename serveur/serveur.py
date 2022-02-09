@@ -1,10 +1,10 @@
-"""test_server
+"""serveur
 
 Usage:
-    dtb_user.py [--port=<int>]
+    serveur.py [--port=<int>]
 
 Options:
-    --port=<int>  Port used [default=8000]
+    --port=<int>  Port used [default: 8000]
 """
 
 import json
@@ -96,11 +96,6 @@ if __name__ == "__main__":
     ARGS = docopt(__doc__)
     if ARGS["--port"]:
         bdd.bdd_creation("data.db")
-        bdd.bdd_add("data.db",
-                "Maurice",
-                "aAaa#a9aa",
-                "0.0.0.0:6840",
-                bdd.create_random_string(64))
         APP.run(host="0.0.0.0", port=ARGS["--port"])
     else:
         logging.error("Wrong command line arguments")
