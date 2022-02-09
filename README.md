@@ -100,13 +100,13 @@ Our database and its tests was done by Nikolaï.
 All runners and docker handler was made by our DevOps, Maxime.
 
 ### Roles
-Scrum Master: Alexandra
-DevOps and Docker Master: Maxime
-P2P Master: Edern
-IP Master: Mohamed-Ali
-HTTP Master: Florent
-OpenSSL Master: Steven
-DB Master: Nikolaï
-Git Master: Lola
-
-
+***
+* _Scrum Master_: Alexandra
+* _DevOps and Docker Master_: Maxime
+* _P2P Master_: Edern
+* _IP Master_: Mohamed-Ali
+* _HTTP Master_: Florent
+* _OpenSSL Master_: Steven
+* _DB Master_: Nikolaï
+* _Git Master_: Lola
+***
