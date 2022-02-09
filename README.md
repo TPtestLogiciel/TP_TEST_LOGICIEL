@@ -101,12 +101,12 @@ All runners and docker handler was made by our DevOps, Maxime.
 
 ### Roles
 ***
-* _Scrum Master_: Alexandra
-* _DevOps and Docker Master_: Maxime
-* _P2P Master_: Edern
-* _IP Master_: Mohamed-Ali
-* _HTTP Master_: Florent
-* _OpenSSL Master_: Steven
-* _DB Master_: Nikolaï
-* _Git Master_: Lola
+* __Scrum Master__: Alexandra
+* __DevOps and Docker Master__: Maxime
+* __P2P Master__: Edern
+* __IP Master__: Mohamed-Ali
+* __HTTP Master__: Florent
+* __OpenSSL Master__: Steven
+* __DB Master__: Nikolaï
+* __Git Master__: Lola
 ***
