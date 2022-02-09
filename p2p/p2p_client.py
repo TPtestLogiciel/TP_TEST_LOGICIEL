@@ -1,11 +1,10 @@
 """p2p_client
 
 Usage:
-    p2p_client.py --buddy=<buddy> --port_source=<int> --port_server=<int>
+    p2p_client.py --port_source=<int> --port_server=<int>
 
 Options:
     -h --help  Show this screen for help
-    --buddy=<buddy>  the user we want to talk to
     --port_source=<int>  source port
     --port_server=<int>  source server
 """
@@ -24,40 +23,41 @@ from docopt import docopt
 from flask import Flask, Response, request
 from OpenSSL import crypto
 
-# import bdd
-
 app = Flask(__name__)
 
 
 def input_register(server_ip, server_port, ip, source_port):
     name_user = input("Please enter your username : ")
     pwd = input("Please enter your password : ")
+    key_name = input("Donner la clé:")
+    if os.path.exists(key_name):
+        last_four_char = key_name[-4:]
+        if last_four_char == ".pem":
+            key_file = open(key_name, mode="r")
+            key_content = key_file.read()
+            key_file.close()
+        else:
+            print("Error : File is not a key")
+    else:
+        print("Error : File does not exist")
+
     (msg_received, status, reason) = register(
-        server_ip, server_port, ip, source_port, name_user, pwd
+        server_ip, server_port, ip, source_port, name_user, pwd, key_content
     )
     return msg_received, status, reason
 
 
-def register(server_ip, server_port, ip, source_port, name_user, pwd):
+def register(server_ip, server_port, ip, source_port, name_user, pwd, key_content):
     try:
         conn = http.client.HTTPConnection(server_ip, server_port)
         http_headers = {"Content-Type": "application/json"}
         ip = ip + ":" + str(source_port)
-        key_name = input("Donner la clé:")
-
-        if os.path.exists(key_name):
-            last_four_char = key_name[-4:]
-            if last_four_char == ".pem":
-                key_file = open(key_name, mode="r")
-                key_content = key_file.read()
-                key_file.close()
-            else:
-                print("Error : File is not a key")
-        else:
-            print("Error : File does not exist")
-        key=key_content
-
-        data_to_server = {"username": name_user, "pwd": pwd, "ip": ip, "key": key}
+        data_to_server = {
+            "username": name_user,
+            "pwd": pwd,
+            "ip": ip,
+            "key": key_content,
+        }
         json_data = json.dumps(data_to_server)
 
         conn.request("POST", "/register", json_data, http_headers)
@@ -239,7 +239,7 @@ def sign_and_send_message(
         http_headers = {"Content-Type": "application/json"}
         message_signe, signature = sign_message(message, private_key, password)
 
-        dataToServer = {
+        data_to_server = {
             "username": username,
             "text": message_signe,
             "signature": signature,
@@ -292,12 +292,13 @@ def compose_message(target_ip, target_port, user):
         )
 
 
-def server(ipaddress, local_port, user):
+def server(ipaddress, local_port):
     """
     Creer un serveur avec une adresse ip et un port passes en
     arguments
     """
     app.run(host=ipaddress, port=local_port)
+
 
 @app.route("/isalive", methods=["GET"])
 def is_alive():
@@ -337,12 +338,12 @@ def p2p_post_and_sign():
     print("<< {} : {}".format(user, text, signature))
     return data
 
+
 if __name__ == "__main__":
     ARGS = docopt(__doc__)
 
     server_ip = "0.0.0.0"
     server_port = ARGS["--port_server"]
-    user = ARGS["--buddy"]
     source_ip = "0.0.0.0"
     source_port = ARGS["--port_source"]
 
@@ -350,6 +351,7 @@ if __name__ == "__main__":
     (msg_received, status, reason) = input_register(
         server_ip, server_port, source_ip, source_port
     )
+    user = input("Who you want to talk to? Enter its username: ")
     # Get user ip and port
     (msg_received, status, reason) = get_ip_port(server_ip, server_port, user)
     if status == 200:
@@ -361,7 +363,7 @@ if __name__ == "__main__":
             thread1 = threading.Thread(
                 target=compose_message, args=(ip, target_port, user)
             )
-            thread2 = threading.Thread(target=server, args=(ip, source_port, user))
+            thread2 = threading.Thread(target=server, args=(ip, source_port))
             thread1.start()
             thread2.start()
             thread1.join()

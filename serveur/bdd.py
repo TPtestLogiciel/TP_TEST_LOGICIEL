@@ -46,9 +46,9 @@ def check_password(password):
 
 
 def check_key(key):
-    if len(key) != 64:
-        return False
-    return True
+    if len(key) >= 64:
+        return True
+    return False
 
 
 def check_user_login(db_path, username, password):
@@ -114,12 +114,15 @@ def check_ip(ip):
 
 
 def bdd_creation(db_path):
+    if os.path.exists("data.db"):
+        os.remove("data.db")
 
     if os.path.isfile(db_path):
         return False
     conn, cur = connect_db(db_path)
     sql = "DROP TABLE IF EXISTS BDD"
     cur.execute(sql)
+    
     conn.commit()
 
     sql = """CREATE TABLE BDD (
