@@ -80,7 +80,7 @@ Then, execute a client and provide its port (8001) and server port (8000):
 ```sh
 python3 p2p/p2p_client.py --port_source=8001 --port_server=8000
 ```
-In terminal, you should see some input requests to register to the database. You have to enter your username, a password and the path to your public certificate in order to signed message you will send. You have to generate your key before launching p2p_client so you can provide the path.
+In terminal, you should see some input requests to register to the database. You have to enter your username, a password and the path to your public certificate in order to signed message you will send. You have to generate your key before launching p2p_client so you can provide the path. We provided 2 publics keys (cert.pem and cert2.pem) and 1 private key (private.pem) for our tests but you can use them to execute our application.
 Then, the terminal asks a last question: the username of the person you want to talk to. This person must be registered in the database. If so, you will be in communication with that person (if connected ;)).
 
 Another client can be executed to see in the p2p communication is working. You can repeat the previous command, but do not forget to change the --port_source!
