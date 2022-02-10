@@ -99,9 +99,13 @@ Devops work
 
 ## Members
 This project was well lead and carried out by our Scrum Master, Alexandra.
+
 Our p2p client program and its tests was mainly done by Steven, Edern and Lola, with obviously some help by other members. All encrypt functions was all made by Steven.
+
 Our server program and its tests was mainly done by Mohamed-Ali and Florent, with the help of Nikolaï and Edern at some point of the project.
+
 Our database and its tests was done by Nikolaï.
+
 All runners and docker handler was made by our DevOps, Maxime.
 
 ### Roles
